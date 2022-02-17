@@ -15,6 +15,7 @@ namespace KeyStroke
     {
         Stopwatch clock = new Stopwatch();
         frmPopup lastfrm = null;
+        bool closing = false;
         public frmMain()
         {
             InitializeComponent();
@@ -39,6 +40,7 @@ namespace KeyStroke
                 Keys loggedKey = e.KeyboardData.Key;
                 int loggedVkCode = e.KeyboardData.VirtualCode;
                 Debug.WriteLine(loggedKey + " | " + loggedVkCode + " | ");
+                bool reset = false;
 
                 string txt = loggedKey.ToString();
                 if (e.KeyboardData.Flags == GlobalKeyboardHook.LlkhfAltdown | loggedKey.ToString().ToLower() == "rmenu" | loggedKey.ToString().ToLower() == "lmenu")
@@ -69,7 +71,7 @@ namespace KeyStroke
                     }
                     if (loggedKey.ToString().ToLower() == "space")
                     {
-                        txt = " ";
+                        txt = "⎵";
                     }
                     if (loggedKey.ToString().ToLower() == "escape")
                     {
@@ -95,6 +97,11 @@ namespace KeyStroke
                     {
                         txt = "↓";
                     }
+                    if (loggedKey.ToString().ToLower() == "back")
+                    {
+                        txt = "Back";
+                        reset = true;
+                    }
                     if (loggedKey.ToString().Length==2 & loggedKey.ToString().StartsWith("D"))
                     {
                         txt = loggedKey.ToString().Substring(1);
@@ -112,7 +119,7 @@ namespace KeyStroke
                 }
                 double elapsed = clock.Elapsed.TotalMilliseconds;
 
-                if (elapsed>1000 | lastfrm == null)
+                if (elapsed>1000 | lastfrm == null | reset)
                 {
                     clock.Restart();
                     frmPopup frm = new frmPopup();
@@ -138,12 +145,15 @@ namespace KeyStroke
                         {
                         combined = true;
                     }
-                    lbl.Text = lbl.Text + (combined? " + ":"") + txt;
-                    frm.Show();
-                    frm.Left = 0;
-                    frm.Height = lbl.Height;
-                    frm.Top = Screen.PrimaryScreen.Bounds.Height - frm.Height - 100;
-                    frm.Width = lbl.Width;
+                    if (txt != lbl.Text & !lbl.Text.Contains(txt + " + " ))
+                    {
+                        lbl.Text = lbl.Text + (combined ? " + " : "") + txt;
+                        frm.Show();
+                        frm.Left = 0;
+                        frm.Height = lbl.Height;
+                        frm.Top = Screen.PrimaryScreen.Bounds.Height - frm.Height - 100;
+                        frm.Width = lbl.Width;
+                    }
                 }
 
             }
@@ -160,6 +170,7 @@ namespace KeyStroke
             this.Visible = false;
             ni1.Visible = true;
             this.ShowInTaskbar = false;
+            this.Text = Application.ProductName + " - " + Application.ProductVersion;
         }
 
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
@@ -169,12 +180,34 @@ namespace KeyStroke
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            closing = true;
             Application.Exit();
         }
 
         private void label2_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            Process.Start("www.arahimi.ca");
+        }
+
+        private void frmMain_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (!closing)
+            {
+                e.Cancel = true;
+                this.Hide();
+                ni1.BalloonTipText = Application.ProductName + " is still running in the background. To exit, open the tray icon menu and click on Exit.";
+                ni1.ShowBalloonTip(1000);
+            }
+        }
+
+        private void ni1_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            this.Show();
         }
     }
 }
