@@ -40,6 +40,10 @@
             this.label2 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.linkLabel1 = new System.Windows.Forms.LinkLabel();
+            this.chkCombined = new System.Windows.Forms.CheckBox();
+            this.label4 = new System.Windows.Forms.Label();
+            this.label5 = new System.Windows.Forms.Label();
+            this.cmbDisplay = new System.Windows.Forms.ComboBox();
             this.ctx1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
@@ -132,11 +136,55 @@
             this.linkLabel1.Text = "arahimi.ca";
             this.linkLabel1.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel1_LinkClicked);
             // 
+            // chkCombined
+            // 
+            this.chkCombined.AutoSize = true;
+            this.chkCombined.Location = new System.Drawing.Point(12, 224);
+            this.chkCombined.Name = "chkCombined";
+            this.chkCombined.Size = new System.Drawing.Size(288, 17);
+            this.chkCombined.TabIndex = 6;
+            this.chkCombined.Text = "Don\'t show alphabet unless combined with special keys";
+            this.chkCombined.UseVisualStyleBackColor = true;
+            this.chkCombined.CheckedChanged += new System.EventHandler(this.chkCombined_CheckedChanged);
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label4.Location = new System.Drawing.Point(12, 205);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(75, 13);
+            this.label4.TabIndex = 7;
+            this.label4.Text = "Preferences";
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(12, 248);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(81, 13);
+            this.label5.TabIndex = 8;
+            this.label5.Text = "Display to show";
+            // 
+            // cmbDisplay
+            // 
+            this.cmbDisplay.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbDisplay.FormattingEnabled = true;
+            this.cmbDisplay.Location = new System.Drawing.Point(100, 248);
+            this.cmbDisplay.Name = "cmbDisplay";
+            this.cmbDisplay.Size = new System.Drawing.Size(246, 21);
+            this.cmbDisplay.TabIndex = 9;
+            this.cmbDisplay.SelectedIndexChanged += new System.EventHandler(this.cmbDisplay_SelectedIndexChanged);
+            // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(379, 193);
+            this.ClientSize = new System.Drawing.Size(379, 295);
+            this.Controls.Add(this.cmbDisplay);
+            this.Controls.Add(this.label5);
+            this.Controls.Add(this.label4);
+            this.Controls.Add(this.chkCombined);
             this.Controls.Add(this.linkLabel1);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label2);
@@ -169,5 +217,9 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.LinkLabel linkLabel1;
+        private System.Windows.Forms.CheckBox chkCombined;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.ComboBox cmbDisplay;
     }
 }

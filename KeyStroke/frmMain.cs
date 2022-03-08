@@ -11,11 +11,16 @@ using System.Windows.Forms;
 
 namespace KeyStroke
 {
+
     public partial class frmMain : Form
     {
         Stopwatch clock = new Stopwatch();
         frmPopup lastfrm = null;
         bool closing = false;
+        Screen screen = Screen.PrimaryScreen;
+
+
+
         public frmMain()
         {
             InitializeComponent();
@@ -126,12 +131,12 @@ namespace KeyStroke
                     lastfrm = frm;
                     Label lbl = (Label)frm.Controls.Find("lblKeys", true).FirstOrDefault();
                     lbl.Text = txt;
-                    frm.Show();
-                    frm.Left = 0;
-                    frm.Height = lbl.Height;
-                    frm.Top = Screen.PrimaryScreen.Bounds.Height - frm.Height - 100;
-                    frm.Width = lbl.Width;
-                } else
+                    //frm.Show();
+                    //frm.Left = screen.WorkingArea.Left;
+                    //frm.Height = lbl.Height;
+                    //frm.Top = screen.Bounds.Height - frm.Height - 100;
+                    //frm.Width = lbl.Width;
+                } 
                 {
                     clock.Restart();
                     frmPopup frm = lastfrm;
@@ -142,16 +147,16 @@ namespace KeyStroke
                     }
                     bool combined = false;
                     if (lbl.Text.ToLower().StartsWith("shift") | lbl.Text.ToLower().StartsWith("ctrl") | lbl.Text.ToLower().StartsWith("❖") | lbl.Text.ToLower().StartsWith("alt"))
-                        {
+                    {
                         combined = true;
                     }
                     if (txt != lbl.Text & !lbl.Text.Contains(txt + " + " ))
                     {
                         lbl.Text = lbl.Text + (combined ? " + " : "") + txt;
                         frm.Show();
-                        frm.Left = 0;
+                        frm.Left = screen.WorkingArea.Left;
                         frm.Height = lbl.Height;
-                        frm.Top = Screen.PrimaryScreen.Bounds.Height - frm.Height - 100;
+                        frm.Top = screen.Bounds.Height - frm.Height - 100;
                         frm.Width = lbl.Width;
                     }
                 }
@@ -171,6 +176,27 @@ namespace KeyStroke
             ni1.Visible = true;
             this.ShowInTaskbar = false;
             this.Text = Application.ProductName + " - " + Application.ProductVersion;
+            chkCombined.Checked = Properties.Settings.Default.onlyCombined;
+            if (Screen.AllScreens.Count() > 1)
+            {
+                cmbDisplay.Enabled = true;
+                var index = 0;
+                foreach (var disp in Screen.AllScreens)
+                {
+                    cmbDisplay.Items.Add(disp.DeviceName.Replace(".","").Replace("\\","").Replace("/",""));// + "|" + disp.WorkingArea.Left + "," + disp.WorkingArea.Top + "," + disp.WorkingArea.Width + "," + disp.WorkingArea.Height);
+                    if (index== Properties.Settings.Default.Monitor)
+                    {
+                        screen = disp;
+                    }
+                    index++;
+                }
+                cmbDisplay.SelectedIndex = Properties.Settings.Default.Monitor;
+            }
+            else
+            {
+                cmbDisplay.Enabled = false; 
+            }
+           
         }
 
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
@@ -208,6 +234,18 @@ namespace KeyStroke
         private void ni1_MouseDoubleClick(object sender, MouseEventArgs e)
         {
             this.Show();
+        }
+
+        private void chkCombined_CheckedChanged(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.onlyCombined = chkCombined.Checked;
+            Properties.Settings.Default.Save();
+        }
+
+        private void cmbDisplay_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.Monitor = cmbDisplay.SelectedIndex;
+            Properties.Settings.Default.Save();
         }
     }
 }
