@@ -44,6 +44,14 @@
             this.label4 = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.cmbDisplay = new System.Windows.Forms.ComboBox();
+            this.label6 = new System.Windows.Forms.Label();
+            this.chkBack = new System.Windows.Forms.CheckBox();
+            this.chkReturn = new System.Windows.Forms.CheckBox();
+            this.chkArrows = new System.Windows.Forms.CheckBox();
+            this.chkShift = new System.Windows.Forms.CheckBox();
+            this.chkCTRL = new System.Windows.Forms.CheckBox();
+            this.chkAlt = new System.Windows.Forms.CheckBox();
+            this.chkWin = new System.Windows.Forms.CheckBox();
             this.ctx1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
@@ -176,13 +184,108 @@
             this.cmbDisplay.TabIndex = 9;
             this.cmbDisplay.SelectedIndexChanged += new System.EventHandler(this.cmbDisplay_SelectedIndexChanged);
             // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label6.Location = new System.Drawing.Point(12, 284);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(143, 13);
+            this.label6.TabIndex = 7;
+            this.label6.Text = "Special Keys to Capture";
+            // 
+            // chkBack
+            // 
+            this.chkBack.AutoSize = true;
+            this.chkBack.Location = new System.Drawing.Point(15, 312);
+            this.chkBack.Name = "chkBack";
+            this.chkBack.Size = new System.Drawing.Size(51, 17);
+            this.chkBack.TabIndex = 10;
+            this.chkBack.Text = "Back";
+            this.chkBack.UseVisualStyleBackColor = true;
+            this.chkBack.CheckedChanged += new System.EventHandler(this.chkBack_CheckedChanged);
+            // 
+            // chkReturn
+            // 
+            this.chkReturn.AutoSize = true;
+            this.chkReturn.Location = new System.Drawing.Point(15, 335);
+            this.chkReturn.Name = "chkReturn";
+            this.chkReturn.Size = new System.Drawing.Size(88, 17);
+            this.chkReturn.TabIndex = 11;
+            this.chkReturn.Text = "Return/Enter";
+            this.chkReturn.UseVisualStyleBackColor = true;
+            this.chkReturn.CheckedChanged += new System.EventHandler(this.chkReturn_CheckedChanged);
+            // 
+            // chkArrows
+            // 
+            this.chkArrows.AutoSize = true;
+            this.chkArrows.Location = new System.Drawing.Point(15, 359);
+            this.chkArrows.Name = "chkArrows";
+            this.chkArrows.Size = new System.Drawing.Size(79, 17);
+            this.chkArrows.TabIndex = 12;
+            this.chkArrows.Text = "Arrow Keys";
+            this.chkArrows.UseVisualStyleBackColor = true;
+            this.chkArrows.CheckedChanged += new System.EventHandler(this.chkArrows_CheckedChanged);
+            // 
+            // chkShift
+            // 
+            this.chkShift.AutoSize = true;
+            this.chkShift.Location = new System.Drawing.Point(15, 383);
+            this.chkShift.Name = "chkShift";
+            this.chkShift.Size = new System.Drawing.Size(47, 17);
+            this.chkShift.TabIndex = 13;
+            this.chkShift.Text = "Shift";
+            this.chkShift.UseVisualStyleBackColor = true;
+            this.chkShift.CheckedChanged += new System.EventHandler(this.chkShift_CheckedChanged);
+            // 
+            // chkCTRL
+            // 
+            this.chkCTRL.AutoSize = true;
+            this.chkCTRL.Location = new System.Drawing.Point(15, 407);
+            this.chkCTRL.Name = "chkCTRL";
+            this.chkCTRL.Size = new System.Drawing.Size(54, 17);
+            this.chkCTRL.TabIndex = 14;
+            this.chkCTRL.Text = "CTRL";
+            this.chkCTRL.UseVisualStyleBackColor = true;
+            this.chkCTRL.CheckedChanged += new System.EventHandler(this.chkCTRL_CheckedChanged);
+            // 
+            // chkAlt
+            // 
+            this.chkAlt.AutoSize = true;
+            this.chkAlt.Location = new System.Drawing.Point(15, 431);
+            this.chkAlt.Name = "chkAlt";
+            this.chkAlt.Size = new System.Drawing.Size(38, 17);
+            this.chkAlt.TabIndex = 15;
+            this.chkAlt.Text = "Alt";
+            this.chkAlt.UseVisualStyleBackColor = true;
+            this.chkAlt.CheckedChanged += new System.EventHandler(this.chkAlt_CheckedChanged);
+            // 
+            // chkWin
+            // 
+            this.chkWin.AutoSize = true;
+            this.chkWin.Location = new System.Drawing.Point(15, 457);
+            this.chkWin.Name = "chkWin";
+            this.chkWin.Size = new System.Drawing.Size(91, 17);
+            this.chkWin.TabIndex = 16;
+            this.chkWin.Text = "Windows Key";
+            this.chkWin.UseVisualStyleBackColor = true;
+            this.chkWin.CheckedChanged += new System.EventHandler(this.chkWin_CheckedChanged);
+            // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(379, 295);
+            this.ClientSize = new System.Drawing.Size(379, 486);
+            this.Controls.Add(this.chkWin);
+            this.Controls.Add(this.chkAlt);
+            this.Controls.Add(this.chkCTRL);
+            this.Controls.Add(this.chkShift);
+            this.Controls.Add(this.chkArrows);
+            this.Controls.Add(this.chkReturn);
+            this.Controls.Add(this.chkBack);
             this.Controls.Add(this.cmbDisplay);
             this.Controls.Add(this.label5);
+            this.Controls.Add(this.label6);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.chkCombined);
             this.Controls.Add(this.linkLabel1);
@@ -221,5 +324,13 @@
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.ComboBox cmbDisplay;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.CheckBox chkBack;
+        private System.Windows.Forms.CheckBox chkReturn;
+        private System.Windows.Forms.CheckBox chkArrows;
+        private System.Windows.Forms.CheckBox chkShift;
+        private System.Windows.Forms.CheckBox chkCTRL;
+        private System.Windows.Forms.CheckBox chkAlt;
+        private System.Windows.Forms.CheckBox chkWin;
     }
 }

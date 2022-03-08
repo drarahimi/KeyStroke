@@ -69,7 +69,6 @@
             this.Name = "frmPopup";
             this.ShowInTaskbar = false;
             this.Text = "frmPopup";
-            this.TopMost = true;
             this.TransparencyKey = System.Drawing.Color.Red;
             this.Load += new System.EventHandler(this.frmPopup_Load);
             this.ResumeLayout(false);

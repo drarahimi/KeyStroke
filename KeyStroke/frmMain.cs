@@ -18,8 +18,7 @@ namespace KeyStroke
         frmPopup lastfrm = null;
         bool closing = false;
         Screen screen = Screen.PrimaryScreen;
-
-
+        Label lbl;
 
         public frmMain()
         {
@@ -39,6 +38,8 @@ namespace KeyStroke
             //    e.Handled = true;
             //}
 
+
+
             if (e.KeyboardState == GlobalKeyboardHook.KeyboardState.KeyDown | e.KeyboardState == GlobalKeyboardHook.KeyboardState.SysKeyDown)
             {
                 // Now you can access both, the key and virtual code
@@ -50,33 +51,84 @@ namespace KeyStroke
                 string txt = loggedKey.ToString();
                 if (e.KeyboardData.Flags == GlobalKeyboardHook.LlkhfAltdown | loggedKey.ToString().ToLower() == "rmenu" | loggedKey.ToString().ToLower() == "lmenu")
                 {
-                    txt = "Alt";
+                    txt =chkAlt.Checked? "Alt":"";
                 }
                 if (loggedVkCode >= 65 & loggedVkCode <= 90)
                 {
                     char c = (char)loggedVkCode;
-                    txt = c.ToString();
+                    if (!chkCombined.Checked)
+                    {
+                        txt = c.ToString();
+                    } else
+                    {
+                        if (lastfrm != null)
+                        {
+                            Label lbl = (Label)lastfrm.Controls.Find("lblKeys", true).FirstOrDefault();
+                            if (lbl == null)
+                            {
+                                txt = "";
+                            }
+                            else
+                            {
+                                if (lbl.Text.ToLower().StartsWith("ctrl") | lbl.Text.ToLower().StartsWith("❖") | lbl.Text.ToLower().StartsWith("alt"))
+                                {
+                                    txt = c.ToString();
+                                }
+                                else
+                                {
+                                    txt = "";
+                                }
+                            }
+                        }
+                        else
+                        {
+                            txt = "";
+                        }
+                    }
                 } else
                 {   //http://www.911fonts.com/font/download_KeystrokesMTRegular_5831.htm
                     if (loggedKey.ToString().ToLower()=="lshiftkey" | loggedKey.ToString().ToLower() == "rshiftkey")
                     {
-                        txt = "Shift" ;
+                        txt = chkShift.Checked? "Shift":"" ;
                     }
                     if (loggedKey.ToString().ToLower() == "lcontrolkey" | loggedKey.ToString().ToLower() == "rcontrolkey")
                     {
-                        txt = "CTRL";
+                        txt =chkCTRL.Checked? "CTRL":"";
                     }
                     if (loggedKey.ToString().ToLower() == "lwin")
                     {
-                        txt = "❖";
+                        txt =chkWin.Checked? "❖":"";
                     }
                     if (loggedKey.ToString().ToLower() == "return")
                     {
-                        txt = "Enter";
+                        txt = chkReturn.Checked? "Enter":"";
                     }
                     if (loggedKey.ToString().ToLower() == "space")
                     {
-                        txt = "⎵";
+                        if (lastfrm != null)
+                        {
+                            Label lbl = (Label)lastfrm.Controls.Find("lblKeys", true).FirstOrDefault();
+                            if (lbl == null)
+                            {
+                                txt = "";
+                            }
+                            else
+                            {
+                                if (lbl.Text.ToLower().StartsWith("ctrl") | lbl.Text.ToLower().StartsWith("❖") | lbl.Text.ToLower().StartsWith("alt"))
+                                {
+                                    txt = "⎵";
+                                }
+                                else
+                                {
+                                    txt = "";
+                                }
+                            }
+                        }
+                        else
+                        {
+                            txt = "";
+                        }
+                    
                     }
                     if (loggedKey.ToString().ToLower() == "escape")
                     {
@@ -88,24 +140,31 @@ namespace KeyStroke
                     }
                     if (loggedKey.ToString().ToLower() == "left")
                     {
-                        txt = "←";
+                        txt = chkArrows.Checked ? "←":"";
                     }
                     if (loggedKey.ToString().ToLower() == "right")
                     {
-                        txt = "→";
+                        txt = chkArrows.Checked ? "→":"";
                     }
                     if (loggedKey.ToString().ToLower() == "up")
                     {
-                        txt = "↑";
+                        txt =chkArrows.Checked? "↑":"";
                     }
                     if (loggedKey.ToString().ToLower() == "down")
                     {
-                        txt = "↓";
+                        txt = chkArrows.Checked ? "↓":"";
                     }
                     if (loggedKey.ToString().ToLower() == "back")
                     {
-                        txt = "Back";
-                        reset = true;
+                        if (chkBack.Checked)
+                        {
+                            txt = "Back";
+                            reset = true;
+                        } else
+                        {
+                            txt = "";
+                        }
+                    
                     }
                     if (loggedKey.ToString().Length==2 & loggedKey.ToString().StartsWith("D"))
                     {
@@ -129,14 +188,14 @@ namespace KeyStroke
                     clock.Restart();
                     frmPopup frm = new frmPopup();
                     lastfrm = frm;
-                    Label lbl = (Label)frm.Controls.Find("lblKeys", true).FirstOrDefault();
+                    lbl = (Label)frm.Controls.Find("lblKeys", true).FirstOrDefault();
                     lbl.Text = txt;
-                    //frm.Show();
-                    //frm.Left = screen.WorkingArea.Left;
-                    //frm.Height = lbl.Height;
-                    //frm.Top = screen.Bounds.Height - frm.Height - 100;
-                    //frm.Width = lbl.Width;
-                } 
+                    frm.Show();
+                    frm.Left = screen.WorkingArea.Left;
+                    frm.Height = lbl.Height;
+                    frm.Top = screen.Bounds.Height - frm.Height - 100;
+                    frm.Width = lbl.Width;
+                } else 
                 {
                     clock.Restart();
                     frmPopup frm = lastfrm;
@@ -177,6 +236,14 @@ namespace KeyStroke
             this.ShowInTaskbar = false;
             this.Text = Application.ProductName + " - " + Application.ProductVersion;
             chkCombined.Checked = Properties.Settings.Default.onlyCombined;
+            chkBack.Checked = Properties.Settings.Default.Back;
+            chkReturn.Checked = Properties.Settings.Default.Return;
+            chkArrows.Checked = Properties.Settings.Default.Arrows;
+            chkShift.Checked = Properties.Settings.Default.Shift;
+            chkCTRL.Checked = Properties.Settings.Default.Ctrl;
+            chkAlt.Checked = Properties.Settings.Default.Alt;
+            chkWin.Checked = Properties.Settings.Default.Win;
+
             if (Screen.AllScreens.Count() > 1)
             {
                 cmbDisplay.Enabled = true;
@@ -245,6 +312,48 @@ namespace KeyStroke
         private void cmbDisplay_SelectedIndexChanged(object sender, EventArgs e)
         {
             Properties.Settings.Default.Monitor = cmbDisplay.SelectedIndex;
+            Properties.Settings.Default.Save();
+        }
+
+        private void chkBack_CheckedChanged(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.Back = chkBack.Checked;
+            Properties.Settings.Default.Save();
+        }
+
+        private void chkReturn_CheckedChanged(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.Return = chkReturn.Checked;
+            Properties.Settings.Default.Save();
+        }
+
+        private void chkArrows_CheckedChanged(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.Arrows = chkArrows.Checked;
+            Properties.Settings.Default.Save();
+        }
+
+        private void chkShift_CheckedChanged(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.Shift = chkShift.Checked;
+            Properties.Settings.Default.Save();
+        }
+
+        private void chkCTRL_CheckedChanged(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.Ctrl = chkCTRL.Checked;
+            Properties.Settings.Default.Save();
+        }
+
+        private void chkAlt_CheckedChanged(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.Alt = chkAlt.Checked;
+            Properties.Settings.Default.Save();
+        }
+
+        private void chkWin_CheckedChanged(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.Win = chkWin.Checked;
             Properties.Settings.Default.Save();
         }
     }

@@ -64,7 +64,7 @@ namespace KeyStroke
             this.Top -= 3;
             if (opac <= 0)
             {
-                this.Dispose();
+                this.Close();
             }
         }
 
