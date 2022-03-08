@@ -130,5 +130,29 @@ namespace KeyStroke.Properties {
                 this["Win"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool OEM {
+            get {
+                return ((bool)(this["OEM"]));
+            }
+            set {
+                this["OEM"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool Num {
+            get {
+                return ((bool)(this["Num"]));
+            }
+            set {
+                this["Num"] = value;
+            }
+        }
     }
 }

@@ -52,6 +52,8 @@
             this.chkCTRL = new System.Windows.Forms.CheckBox();
             this.chkAlt = new System.Windows.Forms.CheckBox();
             this.chkWin = new System.Windows.Forms.CheckBox();
+            this.chkOEM = new System.Windows.Forms.CheckBox();
+            this.chkNum = new System.Windows.Forms.CheckBox();
             this.ctx1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
@@ -271,11 +273,35 @@
             this.chkWin.UseVisualStyleBackColor = true;
             this.chkWin.CheckedChanged += new System.EventHandler(this.chkWin_CheckedChanged);
             // 
+            // chkOEM
+            // 
+            this.chkOEM.AutoSize = true;
+            this.chkOEM.Location = new System.Drawing.Point(15, 481);
+            this.chkOEM.Name = "chkOEM";
+            this.chkOEM.Size = new System.Drawing.Size(101, 17);
+            this.chkOEM.TabIndex = 17;
+            this.chkOEM.Text = "OEM ({ } \\ ; \' ...)";
+            this.chkOEM.UseVisualStyleBackColor = true;
+            this.chkOEM.CheckedChanged += new System.EventHandler(this.chkOEM_CheckedChanged);
+            // 
+            // chkNum
+            // 
+            this.chkNum.AutoSize = true;
+            this.chkNum.Location = new System.Drawing.Point(15, 506);
+            this.chkNum.Name = "chkNum";
+            this.chkNum.Size = new System.Drawing.Size(122, 17);
+            this.chkNum.TabIndex = 18;
+            this.chkNum.Text = "Numbers (1, 2, 3, ...)";
+            this.chkNum.UseVisualStyleBackColor = true;
+            this.chkNum.CheckedChanged += new System.EventHandler(this.chkNum_CheckedChanged);
+            // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(379, 486);
+            this.ClientSize = new System.Drawing.Size(379, 535);
+            this.Controls.Add(this.chkNum);
+            this.Controls.Add(this.chkOEM);
             this.Controls.Add(this.chkWin);
             this.Controls.Add(this.chkAlt);
             this.Controls.Add(this.chkCTRL);
@@ -332,5 +358,7 @@
         private System.Windows.Forms.CheckBox chkCTRL;
         private System.Windows.Forms.CheckBox chkAlt;
         private System.Windows.Forms.CheckBox chkWin;
+        private System.Windows.Forms.CheckBox chkOEM;
+        private System.Windows.Forms.CheckBox chkNum;
     }
 }

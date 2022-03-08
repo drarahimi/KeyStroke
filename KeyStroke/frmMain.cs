@@ -168,11 +168,11 @@ namespace KeyStroke
                     }
                     if (loggedKey.ToString().Length==2 & loggedKey.ToString().StartsWith("D"))
                     {
-                        txt = loggedKey.ToString().Substring(1);
+                        txt =chkNum.Checked? loggedKey.ToString().Substring(1):"";
                     }
                     if (loggedKey.ToString().StartsWith("Oem"))
                     {
-                        txt = loggedKey.ToString().Replace("Oem", "");
+                        txt =chkOEM.Checked? loggedKey.ToString().Replace("Oem", ""):"";
                     }
 
                 }
@@ -243,6 +243,8 @@ namespace KeyStroke
             chkCTRL.Checked = Properties.Settings.Default.Ctrl;
             chkAlt.Checked = Properties.Settings.Default.Alt;
             chkWin.Checked = Properties.Settings.Default.Win;
+            chkOEM.Checked = Properties.Settings.Default.OEM;
+            chkNum.Checked = Properties.Settings.Default.Num;
 
             if (Screen.AllScreens.Count() > 1)
             {
@@ -354,6 +356,18 @@ namespace KeyStroke
         private void chkWin_CheckedChanged(object sender, EventArgs e)
         {
             Properties.Settings.Default.Win = chkWin.Checked;
+            Properties.Settings.Default.Save();
+        }
+
+        private void chkOEM_CheckedChanged(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.OEM = chkOEM.Checked;
+            Properties.Settings.Default.Save();
+        }
+
+        private void chkNum_CheckedChanged(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.Num = chkNum.Checked;
             Properties.Settings.Default.Save();
         }
     }
