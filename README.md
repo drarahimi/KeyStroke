@@ -6,4 +6,4 @@ demo. It includes combined keys as well to help further visualize the key stroke
 ![Animation](https://user-images.githubusercontent.com/88632553/154530481-cab91e43-deb9-44e2-ad12-ffd79f202c49.gif)
 
 You can see the settings that you can use for this app below
-![Screenshot 2022-03-08 152441](https://user-images.githubusercontent.com/88632553/157319001-85afe995-1216-477b-9c48-b346aaacd5cb.png)
+![Properties Screen](https://user-images.githubusercontent.com/88632553/157319001-85afe995-1216-477b-9c48-b346aaacd5cb.png)
