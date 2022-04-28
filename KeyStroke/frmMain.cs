@@ -189,7 +189,7 @@ namespace KeyStroke
                 }
                 double elapsed = clock.Elapsed.TotalMilliseconds;
 
-                if (elapsed>1000 | lastfrm == null | reset | "home,end,insert,delete,pageup,next,pause,scroll,printscreen,mediaplayerpause,volumemute,volumeup,volumedown,esc".Contains(lbl.Text.ToLower()))
+                if (elapsed > 1000 | lastfrm == null | reset | (lbl!=null && "home,end,insert,delete,pageup,next,pause,scroll,printscreen,mediaplayerpause,volumemute,volumeup,volumedown,esc".Contains(lbl.Text.ToLower())))
                 {
                     Debug.WriteLine("I am in first condition {elapsed >1000 | lastfm = null | reset}");
                     clock.Restart();
@@ -197,12 +197,20 @@ namespace KeyStroke
                     lastfrm = frm;
                     lbl = (Label)frm.Controls.Find("lblKeys", true).FirstOrDefault();
                     lbl.Text = txt;
-                    frm.Show();
-                    frm.Left = screen.WorkingArea.Left;
-                    frm.Height = lbl.Height;
-                    frm.Top = screen.Bounds.Height - frm.Height - 100;
-                    frm.Width = lbl.Width;
-                } else 
+                    Debug.WriteLine($"lbl.text.length = {lbl.Text.Trim().Length}");
+                    if (lbl.Text.Trim().Length == 0)
+                    {
+                        //frm.Visible = false;
+                    }else 
+                    {
+                        frm.Show();
+                        frm.Left = screen.WorkingArea.Left;
+                        frm.Height = lbl.Height;
+                        frm.Top = screen.Bounds.Height - frm.Height - 100;
+                        frm.Width = lbl.Width;
+                    }
+                }
+                else
                 {
                     Debug.WriteLine("I am in 2nd condition not{elapsed >1000 | lastfm = null | reset}");
                     clock.Restart();
@@ -217,14 +225,21 @@ namespace KeyStroke
                     {
                         combined = true;
                     }
-                    if (txt != lbl.Text & !lbl.Text.Contains(txt + " + " ))
+                    if (txt != lbl.Text & !lbl.Text.Contains(txt + " + "))
                     {
                         lbl.Text = lbl.Text + (combined ? " + " : "") + txt;
                         frm.Show();
-                        frm.Left = screen.WorkingArea.Left;
-                        frm.Height = lbl.Height;
-                        frm.Top = screen.Bounds.Height - frm.Height - 100;
-                        frm.Width = lbl.Width;
+                        if (lbl.Text.Trim().Length == 0)
+                        {
+                            //frm.Visible = false;
+                        }
+                        else {
+                            frm.Show();
+                            frm.Left = screen.WorkingArea.Left;
+                            frm.Height = lbl.Height;
+                            frm.Top = screen.Bounds.Height - frm.Height - 100;
+                            frm.Width = lbl.Width;
+                        }
                     }
                 }
 
