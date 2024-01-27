@@ -12,7 +12,7 @@ namespace KeyStroke.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.1.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "17.8.0.0")]
     internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
         
         private static Settings defaultInstance = ((Settings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Settings())));
@@ -20,18 +20,6 @@ namespace KeyStroke.Properties {
         public static Settings Default {
             get {
                 return defaultInstance;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool onlyCombined {
-            get {
-                return ((bool)(this["onlyCombined"]));
-            }
-            set {
-                this["onlyCombined"] = value;
             }
         }
         
@@ -50,108 +38,120 @@ namespace KeyStroke.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool Back {
+        public bool chkCombined {
             get {
-                return ((bool)(this["Back"]));
+                return ((bool)(this["chkCombined"]));
             }
             set {
-                this["Back"] = value;
+                this["chkCombined"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool Return {
+        public bool chkBack {
             get {
-                return ((bool)(this["Return"]));
+                return ((bool)(this["chkBack"]));
             }
             set {
-                this["Return"] = value;
+                this["chkBack"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool Arrows {
+        public bool chkReturn {
             get {
-                return ((bool)(this["Arrows"]));
+                return ((bool)(this["chkReturn"]));
             }
             set {
-                this["Arrows"] = value;
+                this["chkReturn"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool Shift {
+        public bool chkArrows {
             get {
-                return ((bool)(this["Shift"]));
+                return ((bool)(this["chkArrows"]));
             }
             set {
-                this["Shift"] = value;
+                this["chkArrows"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool Ctrl {
+        public bool chkShift {
             get {
-                return ((bool)(this["Ctrl"]));
+                return ((bool)(this["chkShift"]));
             }
             set {
-                this["Ctrl"] = value;
+                this["chkShift"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool Alt {
+        public bool chkCTRL {
             get {
-                return ((bool)(this["Alt"]));
+                return ((bool)(this["chkCTRL"]));
             }
             set {
-                this["Alt"] = value;
+                this["chkCTRL"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool Win {
+        public bool chkAlt {
             get {
-                return ((bool)(this["Win"]));
+                return ((bool)(this["chkAlt"]));
             }
             set {
-                this["Win"] = value;
+                this["chkAlt"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool OEM {
+        public bool chkWin {
             get {
-                return ((bool)(this["OEM"]));
+                return ((bool)(this["chkWin"]));
             }
             set {
-                this["OEM"] = value;
+                this["chkWin"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool Num {
+        public bool chkOEM {
             get {
-                return ((bool)(this["Num"]));
+                return ((bool)(this["chkOEM"]));
             }
             set {
-                this["Num"] = value;
+                this["chkOEM"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool chkNum {
+            get {
+                return ((bool)(this["chkNum"]));
+            }
+            set {
+                this["chkNum"] = value;
             }
         }
     }

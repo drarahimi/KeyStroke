@@ -2,37 +2,37 @@
 <SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="KeyStroke.Properties" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
-    <Setting Name="onlyCombined" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">False</Value>
-    </Setting>
     <Setting Name="Monitor" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
-    <Setting Name="Back" Type="System.Boolean" Scope="User">
+    <Setting Name="chkCombined" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
-    <Setting Name="Return" Type="System.Boolean" Scope="User">
+    <Setting Name="chkBack" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
-    <Setting Name="Arrows" Type="System.Boolean" Scope="User">
+    <Setting Name="chkReturn" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
-    <Setting Name="Shift" Type="System.Boolean" Scope="User">
+    <Setting Name="chkArrows" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
-    <Setting Name="Ctrl" Type="System.Boolean" Scope="User">
+    <Setting Name="chkShift" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
-    <Setting Name="Alt" Type="System.Boolean" Scope="User">
+    <Setting Name="chkCTRL" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
-    <Setting Name="Win" Type="System.Boolean" Scope="User">
+    <Setting Name="chkAlt" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
-    <Setting Name="OEM" Type="System.Boolean" Scope="User">
+    <Setting Name="chkWin" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
-    <Setting Name="Num" Type="System.Boolean" Scope="User">
+    <Setting Name="chkOEM" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="chkNum" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
   </Settings>

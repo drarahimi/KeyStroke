@@ -5,6 +5,7 @@ using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -18,14 +19,45 @@ namespace KeyStroke
         frmPopup lastfrm = null;
         bool closing = false;
         Screen screen = Screen.PrimaryScreen;
-        Label lbl;
+        ComboBox cmbDisplay;
+        // Dictionary to store checkbox values
+        private Dictionary<string, bool> checkboxValues = new Dictionary<string, bool>();
 
         public frmMain()
         {
             InitializeComponent();
+            loadComponents();
         }
 
         private GlobalKeyboardHook _globalKeyboardHook;
+
+        [DllImport("user32.dll")]
+        public static extern IntPtr GetDC(IntPtr hwnd);
+
+        [DllImport("gdi32.dll")]
+        public static extern int GetDeviceCaps(IntPtr hdc, int nIndex);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern bool SetProcessDPIAware();
+
+        public static float GetMagnificationScale()
+        {
+            // Set process as DPI-aware
+            SetProcessDPIAware();
+
+            // Get the screen DPI
+            IntPtr hdc = GetDC(IntPtr.Zero);
+            int dpi = GetDeviceCaps(hdc, 88); // 88 corresponds to LOGPIXELSX
+            ReleaseDC(IntPtr.Zero, hdc);
+
+            // Calculate the scale based on the default DPI (96)
+            float scale = dpi / 96f;
+
+            return scale;
+        }
+
+        [DllImport("user32.dll")]
+        public static extern int ReleaseDC(IntPtr hWnd, IntPtr hDC);
 
         private void OnKeyPressed(object sender, GlobalKeyboardHookEventArgs e)
         {
@@ -51,12 +83,12 @@ namespace KeyStroke
                 string txt = loggedKey.ToString();
                 if (e.KeyboardData.Flags == GlobalKeyboardHook.LlkhfAltdown | loggedKey.ToString().ToLower() == "rmenu" | loggedKey.ToString().ToLower() == "lmenu")
                 {
-                    txt =chkAlt.Checked? "Alt":"";
+                    txt =checkboxValues["chkAlt"]? "Alt":"";
                 }
                 if (loggedVkCode >= 65 & loggedVkCode <= 90)
                 {
                     char c = (char)loggedVkCode;
-                    if (!chkCombined.Checked)
+                    if (!checkboxValues["chkCombined"])
                     {
                         txt = c.ToString();
                     } else
@@ -89,19 +121,19 @@ namespace KeyStroke
                 {   //http://www.911fonts.com/font/download_KeystrokesMTRegular_5831.htm
                     if (loggedKey.ToString().ToLower()=="lshiftkey" | loggedKey.ToString().ToLower() == "rshiftkey")
                     {
-                        txt = chkShift.Checked? "Shift":"" ;
+                        txt = checkboxValues["chkShift"]? "Shift":"" ;
                     }
                     if (loggedKey.ToString().ToLower() == "lcontrolkey" | loggedKey.ToString().ToLower() == "rcontrolkey")
                     {
-                        txt =chkCTRL.Checked? "CTRL":"";
+                        txt = checkboxValues["chkCTRL"]? "CTRL":"";
                     }
                     if (loggedKey.ToString().ToLower() == "lwin")
                     {
-                        txt =chkWin.Checked? "❖":"";
+                        txt = checkboxValues["chkWin"]? "❖":"";
                     }
                     if (loggedKey.ToString().ToLower() == "return")
                     {
-                        txt = chkReturn.Checked? "Enter":"";
+                        txt = checkboxValues["chkReturn"]? "Enter":"";
                     }
                     if (loggedKey.ToString().ToLower() == "space")
                     {
@@ -146,23 +178,23 @@ namespace KeyStroke
                     }
                     if (loggedKey.ToString().ToLower() == "left")
                     {
-                        txt = chkArrows.Checked ? "←":"";
+                        txt = checkboxValues["chkArrows"]? "←":"";
                     }
                     if (loggedKey.ToString().ToLower() == "right")
                     {
-                        txt = chkArrows.Checked ? "→":"";
+                        txt = checkboxValues["chkArrows"]? "→":"";
                     }
                     if (loggedKey.ToString().ToLower() == "up")
                     {
-                        txt =chkArrows.Checked? "↑":"";
+                        txt = checkboxValues["chkArrows"]? "↑":"";
                     }
                     if (loggedKey.ToString().ToLower() == "down")
                     {
-                        txt = chkArrows.Checked ? "↓":"";
+                        txt = checkboxValues["chkArrows"]? "↓":"";
                     }
                     if (loggedKey.ToString().ToLower() == "back")
                     {
-                        if (chkBack.Checked)
+                        if (checkboxValues["chkBack"])
                         {
                             txt = "Back";
                             reset = true;
@@ -174,11 +206,11 @@ namespace KeyStroke
                     }
                     if (loggedKey.ToString().Length==2 & loggedKey.ToString().StartsWith("D"))
                     {
-                        txt =chkNum.Checked? loggedKey.ToString().Substring(1):"";
+                        txt = checkboxValues["chkNum"]? loggedKey.ToString().Substring(1):"";
                     }
                     if (loggedKey.ToString().StartsWith("Oem"))
                     {
-                        txt =chkOEM.Checked? loggedKey.ToString().Replace("Oem", ""):"";
+                        txt = checkboxValues["chkOEM"]? loggedKey.ToString().Replace("Oem", ""):"";
                     }
 
                 }
@@ -189,13 +221,14 @@ namespace KeyStroke
                 }
                 double elapsed = clock.Elapsed.TotalMilliseconds;
 
-                if (elapsed > 1000 | lastfrm == null | reset | (lbl!=null && "home,end,insert,delete,pageup,next,pause,scroll,printscreen,mediaplayerpause,volumemute,volumeup,volumedown,esc".Contains(lbl.Text.ToLower())))
-                {
-                    Debug.WriteLine("I am in first condition {elapsed >1000 | lastfm = null | reset}");
+                //if (elapsed > 1000 | lastfrm == null | reset | ("home,end,insert,delete,pageup,next,pause,scroll,printscreen,mediaplayerpause,volumemute,volumeup,volumedown,esc".Contains(lbl.Text.ToLower())))
+                    if (elapsed > 1000 | lastfrm == null | reset )
+                    {
+                        Debug.WriteLine("I am in first condition {elapsed >1000 | lastfm = null | reset}");
                     clock.Restart();
                     frmPopup frm = new frmPopup();
                     lastfrm = frm;
-                    lbl = (Label)frm.Controls.Find("lblKeys", true).FirstOrDefault();
+                    Label lbl = (Label)frm.Controls.Find("lblKeys", true).FirstOrDefault();
                     lbl.Text = txt;
                     Debug.WriteLine($"lbl.text.length = {lbl.Text.Trim().Length}");
                     if (lbl.Text.Trim().Length == 0)
@@ -254,20 +287,122 @@ namespace KeyStroke
             // Hooks into all keys.
             _globalKeyboardHook = new GlobalKeyboardHook();
             _globalKeyboardHook.KeyboardPressed += OnKeyPressed;
+           
+        }
+
+        private void loadComponents()
+        {
+            TableLayoutPanel tlp1 = new TableLayoutPanel() { Dock = DockStyle.Fill };
+            tlp1.ColumnCount = 2;
+            tlp1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20));
+            tlp1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 80));
+            this.Controls.Add(tlp1);
+
+            var rowIndex = -1;
+            var scale = GetMagnificationScale();
+            var rowHeight = 35 * scale;
+
+            rowIndex++;
+            tlp1.RowStyles.Add(new RowStyle(SizeType.Absolute, rowHeight));
+            Label lbl = new Label()
+            {
+                Text = "Prefrences",
+                Font = new Font(this.Font, FontStyle.Bold),
+                Dock = DockStyle.Fill,
+                TextAlign = ContentAlignment.MiddleRight
+            };
+            tlp1.Controls.Add(lbl, 0, rowIndex);
+
+            rowIndex++;
+            tlp1.RowStyles.Add(new RowStyle(SizeType.Absolute, rowHeight));
+            lbl = new Label()
+            {
+                Text = "Display",
+                Font = new Font(this.Font, FontStyle.Bold),
+                Dock = DockStyle.Fill,
+                TextAlign = ContentAlignment.MiddleRight
+            };
+            tlp1.Controls.Add(lbl, 0, rowIndex);
+
+            cmbDisplay = new ComboBox()
+            {
+                Name = "cmbDisplay",
+                DropDownStyle = ComboBoxStyle.DropDownList,
+                Dock = DockStyle.Fill,
+                Sorted = true
+            };
+            cmbDisplay.SelectedIndexChanged += (sender, e) =>
+            {
+                Properties.Settings.Default.Monitor = cmbDisplay.SelectedIndex;
+                Properties.Settings.Default.Save();
+            };
+            tlp1.Controls.Add(cmbDisplay, 1, rowIndex);
+
+
+            List<string> checkboxNames = new List<string>
+            {
+                "chkCombined",
+                "chkBack",
+                "chkReturn",
+                "chkArrows",
+                "chkShift",
+                "chkCTRL",
+                "chkAlt",
+                "chkWin",
+                "chkOEM",
+                "chkNum"
+            };
+            List<string> checkboxTexts = new List<string>
+            {   "Don't show alphabet unless combined with special keys",
+                "Back",
+                "Return/Enter",
+                "Arrows",
+                "Shift",
+                "CTRL",
+                "Alt",
+                "Windows Key",
+                "OEM ({ } \\ ; ' ...)",
+                "Numbers (1, 2, 3, ...)"
+            };
+
+            if (checkboxNames.Count != checkboxTexts.Count)
+            {
+                throw new ArgumentException("The number of checkbox names and texts should be the same.");
+            }
+
+            for (int i = 0; i < checkboxNames.Count; i++)
+            {
+                rowIndex++;
+                tlp1.RowStyles.Add(new RowStyle(SizeType.Absolute, rowHeight));
+                CheckBox chk = new CheckBox()
+                {
+                    Name = checkboxNames[i],
+                    Text = checkboxTexts[i],
+                    Dock = DockStyle.Fill
+                };
+                chk.CheckedChanged += CheckBox_CheckedChanged;
+
+                // Load the saved value from Properties.Settings
+                try
+                {
+                    if (Properties.Settings.Default[checkboxNames[i]] != null)
+                    {
+                        chk.Checked = (bool)Properties.Settings.Default[checkboxNames[i]];
+                        checkboxValues[checkboxNames[i]] = chk.Checked;
+                    }
+                } catch{ }
+
+                // Add the checkbox to the form
+                tlp1.Controls.Add(chk,1,rowIndex);
+            }
+        
+
             this.Visible = false;
             ni1.Visible = true;
             this.ShowInTaskbar = false;
             this.Text = Application.ProductName + " - " + Application.ProductVersion;
-            chkCombined.Checked = Properties.Settings.Default.onlyCombined;
-            chkBack.Checked = Properties.Settings.Default.Back;
-            chkReturn.Checked = Properties.Settings.Default.Return;
-            chkArrows.Checked = Properties.Settings.Default.Arrows;
-            chkShift.Checked = Properties.Settings.Default.Shift;
-            chkCTRL.Checked = Properties.Settings.Default.Ctrl;
-            chkAlt.Checked = Properties.Settings.Default.Alt;
-            chkWin.Checked = Properties.Settings.Default.Win;
-            chkOEM.Checked = Properties.Settings.Default.OEM;
-            chkNum.Checked = Properties.Settings.Default.Num;
+
+            tlp1.RowCount = rowIndex + 1;
 
             if (Screen.AllScreens.Count() > 1)
             {
@@ -275,8 +410,8 @@ namespace KeyStroke
                 var index = 0;
                 foreach (var disp in Screen.AllScreens)
                 {
-                    cmbDisplay.Items.Add(disp.DeviceName.Replace(".","").Replace("\\","").Replace("/",""));// + "|" + disp.WorkingArea.Left + "," + disp.WorkingArea.Top + "," + disp.WorkingArea.Width + "," + disp.WorkingArea.Height);
-                    if (index== Properties.Settings.Default.Monitor)
+                    cmbDisplay.Items.Add(disp.DeviceName.Replace(".", "").Replace("\\", "").Replace("/", ""));// + "|" + disp.WorkingArea.Left + "," + disp.WorkingArea.Top + "," + disp.WorkingArea.Width + "," + disp.WorkingArea.Height);
+                    if (index == Properties.Settings.Default.Monitor)
                     {
                         screen = disp;
                     }
@@ -286,11 +421,22 @@ namespace KeyStroke
             }
             else
             {
-                cmbDisplay.Enabled = false; 
+                cmbDisplay.Enabled = false;
             }
-           
         }
 
+        // Event handler for CheckBox.CheckedChanged event
+        private void CheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            CheckBox checkBox = (CheckBox)sender;
+
+            // Save the value to Properties.Settings
+            Properties.Settings.Default[checkBox.Name] = checkBox.Checked;
+            Properties.Settings.Default.Save();
+
+            // Update the value in the dictionary
+            checkboxValues[checkBox.Name] = checkBox.Checked;
+        }
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
             this.Show();
@@ -302,15 +448,6 @@ namespace KeyStroke
             Application.Exit();
         }
 
-        private void label2_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            Process.Start("www.arahimi.ca");
-        }
 
         private void frmMain_FormClosing(object sender, FormClosingEventArgs e)
         {
@@ -328,70 +465,6 @@ namespace KeyStroke
             this.Show();
         }
 
-        private void chkCombined_CheckedChanged(object sender, EventArgs e)
-        {
-            Properties.Settings.Default.onlyCombined = chkCombined.Checked;
-            Properties.Settings.Default.Save();
-        }
-
-        private void cmbDisplay_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            Properties.Settings.Default.Monitor = cmbDisplay.SelectedIndex;
-            Properties.Settings.Default.Save();
-        }
-
-        private void chkBack_CheckedChanged(object sender, EventArgs e)
-        {
-            Properties.Settings.Default.Back = chkBack.Checked;
-            Properties.Settings.Default.Save();
-        }
-
-        private void chkReturn_CheckedChanged(object sender, EventArgs e)
-        {
-            Properties.Settings.Default.Return = chkReturn.Checked;
-            Properties.Settings.Default.Save();
-        }
-
-        private void chkArrows_CheckedChanged(object sender, EventArgs e)
-        {
-            Properties.Settings.Default.Arrows = chkArrows.Checked;
-            Properties.Settings.Default.Save();
-        }
-
-        private void chkShift_CheckedChanged(object sender, EventArgs e)
-        {
-            Properties.Settings.Default.Shift = chkShift.Checked;
-            Properties.Settings.Default.Save();
-        }
-
-        private void chkCTRL_CheckedChanged(object sender, EventArgs e)
-        {
-            Properties.Settings.Default.Ctrl = chkCTRL.Checked;
-            Properties.Settings.Default.Save();
-        }
-
-        private void chkAlt_CheckedChanged(object sender, EventArgs e)
-        {
-            Properties.Settings.Default.Alt = chkAlt.Checked;
-            Properties.Settings.Default.Save();
-        }
-
-        private void chkWin_CheckedChanged(object sender, EventArgs e)
-        {
-            Properties.Settings.Default.Win = chkWin.Checked;
-            Properties.Settings.Default.Save();
-        }
-
-        private void chkOEM_CheckedChanged(object sender, EventArgs e)
-        {
-            Properties.Settings.Default.OEM = chkOEM.Checked;
-            Properties.Settings.Default.Save();
-        }
-
-        private void chkNum_CheckedChanged(object sender, EventArgs e)
-        {
-            Properties.Settings.Default.Num = chkNum.Checked;
-            Properties.Settings.Default.Save();
-        }
+      
     }
 }
