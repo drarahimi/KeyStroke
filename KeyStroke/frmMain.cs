@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -23,6 +24,7 @@ namespace KeyStroke
         // Dictionary to store checkbox values
         private Dictionary<string, bool> checkboxValues = new Dictionary<string, bool>();
 
+        [SupportedOSPlatform("windows")]
         public frmMain()
         {
             InitializeComponent();
@@ -59,6 +61,7 @@ namespace KeyStroke
         [DllImport("user32.dll")]
         public static extern int ReleaseDC(IntPtr hWnd, IntPtr hDC);
 
+        [SupportedOSPlatform("windows")]
         private void OnKeyPressed(object sender, GlobalKeyboardHookEventArgs e)
         {
             // EDT: No need to filter for VkSnapshot anymore. This now gets handled
@@ -279,6 +282,7 @@ namespace KeyStroke
             }
         }
 
+        [SupportedOSPlatform("windows")]
         private void frmMain_Load(object sender, EventArgs e)
         {
             // Hooks only into specified Keys (here "A" and "B").
@@ -290,6 +294,7 @@ namespace KeyStroke
            
         }
 
+        [SupportedOSPlatform("windows")]
         private void loadComponents()
         {
             TableLayoutPanel tlp1 = new TableLayoutPanel() { Dock = DockStyle.Fill };
@@ -417,14 +422,19 @@ namespace KeyStroke
                     }
                     index++;
                 }
-                cmbDisplay.SelectedIndex = Properties.Settings.Default.Monitor;
+                if (cmbDisplay.Items.Count > Properties.Settings.Default.Monitor)
+                    cmbDisplay.SelectedIndex = Properties.Settings.Default.Monitor;
             }
             else
             {
                 cmbDisplay.Enabled = false;
             }
+
+            cmbDisplay.SelectedIndexChanged += (sender, e) => { DrawBorderAroundScreen(cmbDisplay.SelectedIndex); };
+
         }
 
+        [SupportedOSPlatform("windows")]
         // Event handler for CheckBox.CheckedChanged event
         private void CheckBox_CheckedChanged(object sender, EventArgs e)
         {
@@ -437,11 +447,57 @@ namespace KeyStroke
             // Update the value in the dictionary
             checkboxValues[checkBox.Name] = checkBox.Checked;
         }
+
+        [SupportedOSPlatform("windows")]
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
             this.Show();
         }
 
+        [SupportedOSPlatform("windows")]
+        public async static void DrawBorderAroundScreen(int screenIndex)
+        {
+            if (screenIndex >= 0 && screenIndex < Screen.AllScreens.Length)
+            {
+                Screen screen = Screen.AllScreens[screenIndex];
+
+                Form frmBound = new Form()
+                {
+                    FormBorderStyle = FormBorderStyle.None,
+                    BackColor = Color.Green,
+                    TransparencyKey = Color.Green,
+                    AllowTransparency = true,
+                    TopMost = true,
+                    ShowInTaskbar = false,                    
+                };
+
+                frmBound.Show();
+                frmBound.Bounds = screen.Bounds;
+                frmBound.Location = new Point(screen.Bounds.Left, screen.Bounds.Top);
+                Debug.WriteLine($"{screen.Bounds.Left},{screen.Bounds.Top},{screen.Bounds.Right},{screen.Bounds.Bottom}");
+
+                frmBound.Paint += async (sender, e) =>
+                {
+                    var brushWidth = 10;
+                    using (Pen pen = new Pen(Color.Red, brushWidth))
+                    {
+                        //e.Graphics.DrawRectangle(pen, new Rectangle(40, 40, frmBound.ClientRectangle.Width, frmBound.ClientRectangle.Height));
+                        e.Graphics.DrawRectangle(pen, 0,0, frmBound.Width, frmBound.Height);
+                    }
+                    Application.DoEvents();
+                    await Task.Delay(2000);
+
+                    frmBound.Close();
+
+                };
+            }
+            else
+            {
+                throw new ArgumentOutOfRangeException(nameof(screenIndex), "Invalid screen index");
+            }
+        }
+
+        [SupportedOSPlatform("windows")]
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
             closing = true;
@@ -449,6 +505,7 @@ namespace KeyStroke
         }
 
 
+        [SupportedOSPlatform("windows")]
         private void frmMain_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (!closing)
@@ -460,6 +517,7 @@ namespace KeyStroke
             }
         }
 
+        [SupportedOSPlatform("windows")]
         private void ni1_MouseDoubleClick(object sender, MouseEventArgs e)
         {
             this.Show();
