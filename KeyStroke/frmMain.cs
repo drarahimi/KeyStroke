@@ -233,134 +233,6 @@ namespace KeyStroke
             }
 
 
-            //if (e.KeyboardState == GlobalKeyboardHook.KeyboardState.KeyDown | e.KeyboardState == GlobalKeyboardHook.KeyboardState.SysKeyDown)
-            //{
-            //    // Now you can access both, the key and virtual code
-            //    Keys loggedKey = e.KeyboardData.Key;
-            //    int loggedVkCode = e.KeyboardData.VirtualCode;
-            //    Debug.WriteLine(loggedKey + " | " + loggedVkCode + " | ");
-            //    bool reset = false;
-
-            //    string txt = loggedKey.ToString();
-            //    if (e.KeyboardData.Flags == GlobalKeyboardHook.LlkhfAltdown | loggedKey.ToString().ToLower() == "rmenu" | loggedKey.ToString().ToLower() == "lmenu")
-            //        txt =checkboxValues["chkAlt"]? "Alt":"";
-            //    if (loggedVkCode >= 65 & loggedVkCode <= 90) //checking for alphabets
-            //    {
-            //        char c = (char)loggedVkCode;
-            //        if (!checkboxValues["chkCombined"])
-            //            txt = c.ToString();
-            //        else
-            //            if (lastfrm != null)
-            //            {
-            //            Label lbl = lastfrm.lblKeys; //(Label)lastfrm.Controls.Find("lblKeys", true).FirstOrDefault();
-            //                if (lbl == null)
-            //                    txt = "";
-            //                else
-            //                    if (lbl.Text.ToLower().StartsWith("ctrl") | lbl.Text.ToLower().StartsWith("❖") | lbl.Text.ToLower().StartsWith("alt"))
-            //                        txt = c.ToString();
-            //                    else
-            //                        txt = "";
-            //            }
-            //            else
-            //                txt = "";
-            //    } else
-            //    {   //http://www.911fonts.com/font/download_KeystrokesMTRegular_5831.htm
-            //        if (loggedKey.ToString().ToLower()=="lshiftkey" | loggedKey.ToString().ToLower() == "rshiftkey")
-            //            txt = checkboxValues["chkShift"]? "Shift":"" ;
-            //        if (loggedKey.ToString().ToLower() == "lcontrolkey" | loggedKey.ToString().ToLower() == "rcontrolkey")
-            //            txt = checkboxValues["chkCTRL"]? "CTRL":"";
-            //        if (loggedKey.ToString().ToLower() == "lwin")
-            //            txt = checkboxValues["chkWin"]? "❖":"";
-            //        if (loggedKey.ToString().ToLower() == "return")
-            //            txt = checkboxValues["chkReturn"]? "Enter":"";
-            //        if (loggedKey.ToString().ToLower() == "space")
-            //            if (lastfrm != null)
-            //            {
-            //                Label lbl = lastfrm.lblKeys;// (Label)lastfrm.Controls.Find("lblKeys", true).FirstOrDefault();
-            //                if (lbl == null)
-            //                    txt = "";
-            //                else
-            //                    if (lbl.Text.ToLower().StartsWith("ctrl") | lbl.Text.ToLower().StartsWith("❖") | lbl.Text.ToLower().StartsWith("alt"))
-            //                        txt = "⎵";
-            //                    else
-            //                        txt = " ";
-            //            }
-            //            else
-            //                txt = "";
-            //        if ("home,end,insert,delete,pageup,next,pause,scroll,printscreen,mediaplayerpause,volumemute,volumeup,volumedown,esc".Contains(loggedKey.ToString().ToLower()))
-            //            reset = true;
-            //        if (loggedKey.ToString().ToLower() == "escape")
-            //            txt = "Esc";
-            //        if (loggedKey.ToString().ToLower() == "capital")
-            //            txt = "Caps Lock";
-            //        if (loggedKey.ToString().ToLower() == "left")
-            //            txt = checkboxValues["chkArrows"]? "←":"";
-            //        if (loggedKey.ToString().ToLower() == "right")
-            //            txt = checkboxValues["chkArrows"]? "→":"";
-            //        if (loggedKey.ToString().ToLower() == "up")
-            //            txt = checkboxValues["chkArrows"]? "↑":"";
-            //        if (loggedKey.ToString().ToLower() == "down")
-            //            txt = checkboxValues["chkArrows"]? "↓":"";
-            //        if (loggedKey.ToString().ToLower() == "back")
-            //            if (checkboxValues["chkBack"])
-            //            {
-            //                txt = "Back";
-            //                reset = true;
-            //            } else
-            //                txt = "";
-
-            //        if (loggedKey.ToString().Length==2 & loggedKey.ToString().StartsWith("D"))
-            //            txt = checkboxValues["chkNum"]? loggedKey.ToString().Substring(1):"";
-            //        if (loggedKey.ToString().StartsWith("Oem"))
-            //            txt = checkboxValues["chkOEM"]? loggedKey.ToString().Replace("Oem", ""):"";
-
-            //        if (txt.Contains("NumPad"))
-            //            txt = txt.Replace("NumPad", "");
-
-            //    }
-
-            //    if (!clock.IsRunning)
-            //        clock.Start();
-            //    double elapsed = clock.Elapsed.TotalMilliseconds;
-
-            //    if (elapsed > 1000 | lastfrm == null | reset)
-            //    {
-            //        Debug.WriteLine("I am in first condition {elapsed >1000 | lastfm = null | reset}");
-            //        clock.Restart();
-            //        frmPopup frm = new frmPopup();
-            //        lastfrm = frm;
-            //        Label lbl = frm.lblKeys; //(Label)frm.Controls.Find("lblKeys", true).FirstOrDefault();
-            //        lbl.Text = txt;
-            //        if (lbl.Text.Trim().Length != 0)
-            //        {
-            //            frm.Show();
-            //            frm.Bounds = new Rectangle(screen.WorkingArea.Left, screen.Bounds.Height - frm.Height - 100, lbl.Width, lbl.Height);
-            //        }
-            //    }
-            //    else
-            //    {
-            //        Debug.WriteLine("I am in 2nd condition not{elapsed >1000 | lastfm = null | reset}");
-            //        clock.Restart();
-            //        frmPopup frm = lastfrm;
-            //        Label lbl = frm.lblKeys; //(Label)frm.Controls.Find("lblKeys", true).FirstOrDefault();
-            //        if (lbl == null)
-            //            return;
-            //        bool combined = false;
-            //        if (lbl.Text.ToLower().StartsWith("shift") | lbl.Text.ToLower().StartsWith("ctrl") | lbl.Text.ToLower().StartsWith("❖") | lbl.Text.ToLower().StartsWith("alt"))
-            //            combined = true;
-            //        if (txt != lbl.Text & !lbl.Text.Contains(txt + " + "))
-            //        {
-            //            lbl.Text = lbl.Text + (combined ? " + " : "") + txt;
-
-            //            if (lbl.Text.Trim().Length != 0)
-            //            {
-            //                frm.Show();
-            //                frm.Bounds = new Rectangle(screen.WorkingArea.Left, screen.Bounds.Height - frm.Height - 100, lbl.Width, lbl.Height);
-            //            }
-            //        }
-            //    }
-
-            //}
         }
 
         [SupportedOSPlatform("windows")]
@@ -536,45 +408,35 @@ namespace KeyStroke
         }
 
         [SupportedOSPlatform("windows")]
-        public static void DrawBorderAroundScreen(int screenIndex)
+        public static async void DrawBorderAroundScreen(int screenIndex)
         {
-            if (screenIndex >= 0 && screenIndex < Screen.AllScreens.Length)
-            {
-                Screen screen = Screen.AllScreens[screenIndex];
+            if (screenIndex < 0 || screenIndex >= Screen.AllScreens.Length) return;
 
-                Form frmBound = new Form()
+            Screen screen = Screen.AllScreens[screenIndex];
+            using (Form frmBound = new Form())
+            {
+                frmBound.FormBorderStyle = FormBorderStyle.None;
+                frmBound.BackColor = Color.Green;
+                frmBound.TransparencyKey = Color.Green;
+                frmBound.TopMost = true;
+                frmBound.ShowInTaskbar = false;
+                frmBound.Bounds = screen.Bounds;
+                frmBound.StartPosition = FormStartPosition.Manual;
+
+                // Handle painting safely
+                frmBound.Paint += (s, e) =>
                 {
-                    FormBorderStyle = FormBorderStyle.None,
-                    BackColor = Color.Green,
-                    TransparencyKey = Color.Green,
-                    AllowTransparency = true,
-                    TopMost = true,
-                    ShowInTaskbar = false,                    
+                    using (Pen pen = new Pen(Color.Red, 10))
+                    {
+                        e.Graphics.DrawRectangle(pen, 0, 0, frmBound.Width, frmBound.Height);
+                    }
                 };
 
                 frmBound.Show();
-                frmBound.Bounds = screen.Bounds;
-                frmBound.Location = new Point(screen.Bounds.Left, screen.Bounds.Top);
-                Debug.WriteLine($"{screen.Bounds.Left},{screen.Bounds.Top},{screen.Bounds.Right},{screen.Bounds.Bottom}");
 
-                frmBound.Paint += async (sender, e) =>
-                {
-                    var brushWidth = 10;
-                    using (Pen pen = new Pen(Color.Red, brushWidth))
-                    {
-                        //e.Graphics.DrawRectangle(pen, new Rectangle(40, 40, frmBound.ClientRectangle.Width, frmBound.ClientRectangle.Height));
-                        e.Graphics.DrawRectangle(pen, 0,0, frmBound.Width, frmBound.Height);
-                    }
-                    Application.DoEvents();
-                    await Task.Delay(2000);
-
-                    frmBound.Close();
-
-                };
-            }
-            else
-            {
-                throw new ArgumentOutOfRangeException(nameof(screenIndex), "Invalid screen index");
+                // Wait asynchronously without blocking the UI thread or tying it to the Paint event
+                await Task.Delay(2000);
+                frmBound.Close();
             }
         }
 
