@@ -5,6 +5,8 @@ using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
+using System.Net.Security;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Text;
@@ -13,7 +15,7 @@ using System.Windows.Forms;
 
 namespace KeyStroke
 {
-
+    [SupportedOSPlatform("windows")]
     public partial class frmMain : Form
     {
         Stopwatch clock = new Stopwatch();
@@ -23,8 +25,8 @@ namespace KeyStroke
         ComboBox cmbDisplay;
         // Dictionary to store checkbox values
         private Dictionary<string, bool> checkboxValues = new Dictionary<string, bool>();
-
-        [SupportedOSPlatform("windows")]
+        // Tracks keys that are currently held down to prevent auto-repeat
+        private HashSet<Keys> _heldKeys = new HashSet<Keys>();
         public frmMain()
         {
             InitializeComponent();
@@ -40,6 +42,8 @@ namespace KeyStroke
         [DllImport("user32.dll", SetLastError = true)] public static extern bool SetProcessDPIAware();
 
         [DllImport("user32.dll")] public static extern int ReleaseDC(IntPtr hWnd, IntPtr hDC);
+
+        [DllImport("user32.dll")]   public static extern short GetAsyncKeyState(Keys vKey);
 
         public static char ToAscii(Keys key, Keys modifiers)
         {
@@ -67,175 +71,232 @@ namespace KeyStroke
         }
 
         [DllImport("user32.dll")] private static extern int ToAscii(uint uVirtKey, uint uScanCode, byte[] lpKeyState, [Out] StringBuilder lpChar, uint uFlags);
-    
 
-    public static float GetMagnificationScale()
-        {
-            // Set process as DPI-aware
-            SetProcessDPIAware();
 
-            // Get the screen DPI
-            IntPtr hdc = GetDC(IntPtr.Zero);
-            int dpi = GetDeviceCaps(hdc, 88); // 88 corresponds to LOGPIXELSX
-            ReleaseDC(IntPtr.Zero, hdc);
+        //public static float GetMagnificationScale()
+        //    {
+        //        // Set process as DPI-aware
+        //        SetProcessDPIAware();
 
-            // Calculate the scale based on the default DPI (96)
-            float scale = dpi / 96f;
+        //        // Get the screen DPI
+        //        IntPtr hdc = GetDC(IntPtr.Zero);
+        //        int dpi = GetDeviceCaps(hdc, 88); // 88 corresponds to LOGPIXELSX
+        //        ReleaseDC(IntPtr.Zero, hdc);
 
-            return scale;
-        }
+        //        // Calculate the scale based on the default DPI (96)
+        //        float scale = dpi / 96f;
+
+        //        return scale;
+        //    }
 
         [SupportedOSPlatform("windows")]
         private void OnKeyPressed(object sender, GlobalKeyboardHookEventArgs e)
         {
+            Keys key = e.KeyboardData.Key;
 
-            if (e.KeyboardState == GlobalKeyboardHook.KeyboardState.KeyDown || e.KeyboardState == GlobalKeyboardHook.KeyboardState.SysKeyDown)
+            // --- NEW LOGIC START ---
+
+            // 1. Handle Key Up (User released the key)
+            if (e.KeyboardState == GlobalKeyboardHook.KeyboardState.KeyUp ||
+                e.KeyboardState == GlobalKeyboardHook.KeyboardState.SysKeyUp)
             {
-                // Now you can access both, the key and virtual code
-                Keys loggedKey = e.KeyboardData.Key;
-                int loggedVkCode = e.KeyboardData.VirtualCode;
-                StringBuilder keystr = new StringBuilder();
-                ToAscii((uint)e.KeyboardData.VirtualCode,(uint)e.KeyboardData.HardwareScanCode, new byte[256], keystr,(uint)e.KeyboardData.Flags); // = '?'
-                Debug.WriteLine($"{loggedKey} | {loggedVkCode} | {keystr}");
-                bool reset = false;
+                // Remove it from our tracker so it can be pressed again later
+                _heldKeys.Remove(key);
+                return;
+            }
 
-                string txt = loggedKey.ToString().ToLower();
-
-                if (e.KeyboardData.Flags == GlobalKeyboardHook.LlkhfAltdown || txt == "rmenu" || txt == "lmenu")
-                    txt = checkboxValues["chkAlt"] ? "Alt" : "";
-
-                if (loggedVkCode >= 65 && loggedVkCode <= 90) //checking for alphabets
+            // 2. Handle Key Down (User pressed the key)
+            if (e.KeyboardState == GlobalKeyboardHook.KeyboardState.KeyDown ||
+                e.KeyboardState == GlobalKeyboardHook.KeyboardState.SysKeyDown)
+            {
+                // Check if we are already holding this key. 
+                // If yes, it's a Windows Auto-Repeat -> IGNORE IT.
+                if (_heldKeys.Contains(key))
                 {
-                    char c = (char)loggedVkCode;
-                    txt = (!checkboxValues["chkCombined"] || lastfrm == null ||
-                           lastfrm.lblKeys == null ||
-                           !(lastfrm.lblKeys.Text.ToLower().StartsWith("ctrl") ||
-                           lastfrm.lblKeys.Text.ToLower().StartsWith("❖") ||
-                           lastfrm.lblKeys.Text.ToLower().StartsWith("alt"))) ? c.ToString() : "";
-                }
-                else
-                {
-                    switch (txt)
-                    {
-                        case "lshiftkey":
-                        case "rshiftkey":
-                            txt = checkboxValues["chkShift"] ? "Shift" : "";
-                            break;
-                        case "lcontrolkey":
-                        case "rcontrolkey":
-                            txt = checkboxValues["chkCTRL"] ? "CTRL" : "";
-                            break;
-                        case "lwin":
-                            txt = checkboxValues["chkWin"] ? "❖" : "";
-                            break;
-                        case "return":
-                            txt = checkboxValues["chkReturn"] ? "Enter" : "";
-                            break;
-                        case "space":
-                            txt = (lastfrm != null && lastfrm.lblKeys != null &&
-                                   (lastfrm.lblKeys.Text.ToLower().StartsWith("ctrl") ||
-                                   lastfrm.lblKeys.Text.ToLower().StartsWith("❖") ||
-                                   lastfrm.lblKeys.Text.ToLower().StartsWith("alt"))) ? "⎵" : " ";
-                            break;
-                        case "home":
-                        case "end":
-                        case "insert":
-                        case "delete":
-                        case "pageup":
-                        case "next":
-                        case "pause":
-                        case "scroll":
-                        case "printscreen":
-                        case "mediaplayerpause":
-                        case "volumemute":
-                        case "volumeup":
-                        case "volumedown":
-                        case "esc":
-                            reset = true;
-                            break;
-                        case "escape":
-                            txt = "Esc";
-                            break;
-                        case "capital":
-                            txt = "Caps Lock";
-                            break;
-                        case "left":
-                            txt = checkboxValues["chkArrows"] ? "←" : "";
-                            break;
-                        case "right":
-                            txt = checkboxValues["chkArrows"] ? "→" : "";
-                            break;
-                        case "up":
-                            txt = checkboxValues["chkArrows"] ? "↑" : "";
-                            break;
-                        case "down":
-                            txt = checkboxValues["chkArrows"] ? "↓" : "";
-                            break;
-                        case "back":
-                            txt = checkboxValues["chkBack"] ? "Back" : "";
-                            reset = checkboxValues["chkBack"];
-                            break;
-                        default:
-                            if (txt.Length == 2 && txt.StartsWith("d"))
-                                txt = checkboxValues["chkNum"] ? txt.Substring(1) : "";
-                            else if (txt.StartsWith("oem"))
-                                txt = checkboxValues["chkOEM"] ? txt = keystr[0].ToString() : "";
-
-                            if (txt.Contains("numpad"))
-                                txt = txt.Replace("numpad", "");
-                            break;
-                    }
+                    return;
                 }
 
-                if (!clock.IsRunning)
-                    clock.Start();
+                // Otherwise, mark it as held
+                _heldKeys.Add(key);
+            }
+            else
+            {
+                // Ignore any other weird states
+                return;
+            }
 
-                double elapsed = clock.Elapsed.TotalMilliseconds;
+            // --- NEW LOGIC END ---
 
-                if (elapsed > 1000 || lastfrm == null || reset)
+            // 3. Translate Key to Readable String
+            string keyText = GetKeyDisplayText(e);
+
+            // If the key was disabled by a checkbox (returned null/empty), stop here.
+            if (string.IsNullOrEmpty(keyText)) return;
+
+            // 4. Handle Timing
+            if (!clock.IsRunning) clock.Start();
+            bool isTimedOut = clock.Elapsed.TotalMilliseconds > 1000;
+            clock.Restart();
+
+            // 5. Decide: Create New or Append?
+            bool isTerminator = IsTerminatingKey(e.KeyboardData.Key);
+
+            if (isTimedOut || lastfrm == null || lastfrm.IsDisposed || isTerminator)
+            {
+                CreateNewPopup(keyText);
+            }
+            else
+            {
+                AppendToPopup(keyText);
+            }
+        }
+
+        // Helper: purely for translating keys to text based on your preferences
+        private string GetKeyDisplayText(GlobalKeyboardHookEventArgs e)
+        {
+            Keys key = e.KeyboardData.Key;
+            int vkCode = e.KeyboardData.VirtualCode;
+
+            // A. Check Modifiers first (These always show up)
+            if (IsModifier(key))
+            {
+                switch (key)
                 {
-                    Debug.WriteLine("I am in first condition {elapsed >1000 | lastfm = null | reset}");
-                    clock.Restart();
-                    frmPopup frm = new frmPopup();
-                    lastfrm = frm;
-                    Label lbl = frm.lblKeys;
-                    lbl.Text = txt;
-                    if (lbl.Text.Trim().Length != 0)
-                    {
-                        frm.Show();
-                        frm.Bounds = new Rectangle(screen.WorkingArea.Left, screen.Bounds.Height - frm.Height - 100, lbl.Width, lbl.Height);
-                    }
-                }
-                else
-                {
-                    Debug.WriteLine("I am in 2nd condition not{elapsed >1000 | lastfm = null | reset}");
-                    clock.Restart();
-                    frmPopup frm = lastfrm;
-                    Label lbl = frm.lblKeys;
-                    if (lbl == null)
-                        return;
-
-                    bool combined = lbl.Text.ToLower().StartsWith("shift") ||
-                                    lbl.Text.ToLower().StartsWith("ctrl") ||
-                                    lbl.Text.ToLower().StartsWith("❖") ||
-                                    lbl.Text.ToLower().StartsWith("alt");
-
-                    if (txt != lbl.Text && !lbl.Text.Contains(txt + " + "))
-                    {
-                        lbl.Text = lbl.Text + (combined ? " + " : "") + txt;
-                        if (!frm.IsDisposed && lbl.Text.Trim().Length != 0)
-                        {
-                            frm.Show();
-                            frm.Bounds = new Rectangle(screen.WorkingArea.Left, screen.Bounds.Height - frm.Height - 100, lbl.Width, lbl.Height);
-                        }
-                    }
+                    case Keys.LShiftKey:
+                    case Keys.RShiftKey:
+                        return checkboxValues["chkShift"] ? "Shift" : "";
+                    case Keys.LControlKey:
+                    case Keys.RControlKey:
+                        return checkboxValues["chkCTRL"] ? "CTRL" : "";
+                    case Keys.LMenu:
+                    case Keys.RMenu:
+                        return checkboxValues["chkAlt"] ? "Alt" : "";
+                    case Keys.LWin:
+                    case Keys.RWin:
+                        return checkboxValues["chkWin"] ? "❖" : "";
                 }
             }
 
+            // B. Check Special Keys (These usually show up regardless of modifiers, e.g. Enter)
+            switch (key)
+            {
+                case Keys.Return: return checkboxValues["chkReturn"] ? "Enter" : "";
+                case Keys.Escape: return "Esc";
+                case Keys.Back: return checkboxValues["chkBack"] ? "Back" : "";
+                case Keys.Space: return "⎵";
+                case Keys.Left: return checkboxValues["chkArrows"] ? "←" : "";
+                case Keys.Right: return checkboxValues["chkArrows"] ? "→" : "";
+                case Keys.Up: return checkboxValues["chkArrows"] ? "↑" : "";
+                case Keys.Down: return checkboxValues["chkArrows"] ? "↓" : "";
+                case Keys.Home: return "Home";
+                case Keys.End: return "End";
+                case Keys.Delete: return "Delete";
+                case Keys.PageUp: return "PageUp";
+                case Keys.PageDown: return "PageDown";
+            }
 
+            // --- LOGIC FOR "ONLY SHOW COMBINED" ---
+            // If the checkbox is checked, we verify if a modifier is held down.
+            bool hideUnlessModified = checkboxValues.ContainsKey("chkCombined") && checkboxValues["chkCombined"];
+
+            if (hideUnlessModified)
+            {
+                // Check standard modifiers
+                bool isCtrl = (Control.ModifierKeys & Keys.Control) == Keys.Control;
+                bool isAlt = (Control.ModifierKeys & Keys.Alt) == Keys.Alt;
+
+                // Check Windows Key using API (0x8000 checks the high-order bit for 'currently down')
+                bool isWin = (GetAsyncKeyState(Keys.LWin) & 0x8000) != 0 ||
+                              (GetAsyncKeyState(Keys.RWin) & 0x8000) != 0;
+
+                // Note: We usually DO NOT count Shift as a "combiner" for this feature 
+                // because Shift+A is just typing a capital letter.
+                // If NO modifier is held, return empty to suppress the OSD.
+                if (!isCtrl && !isAlt && !isWin)
+                {
+                    return "";
+                }
+            }
+
+            // C. Check Alphanumeric (A-Z)
+            if (vkCode >= 65 && vkCode <= 90)
+            {
+                return ((char)vkCode).ToString();
+            }
+
+            // D. Check Numbers/OEM
+            string name = key.ToString();
+            if (name.StartsWith("D") && name.Length == 2 && char.IsDigit(name[1]))
+                return checkboxValues["chkNum"] ? name.Substring(1) : "";
+
+            if (name.StartsWith("NumPad"))
+                return name.Replace("NumPad", "");
+
+            if (name.StartsWith("Oem"))
+            {
+                return checkboxValues["chkOEM"] ? "?" : "";
+            }
+
+            return "";
         }
 
-        [SupportedOSPlatform("windows")]
+        private void CreateNewPopup(string text)
+        {
+            frmPopup frm = new frmPopup();
+            lastfrm = frm; // Update state
+            frm.lblKeys.Text = text;
+
+            PositionAndShow(frm);
+        }
+
+        private void AppendToPopup(string text)
+        {
+            // Safety check
+            if (lastfrm.lblKeys == null) return;
+
+            string current = lastfrm.lblKeys.Text;
+
+            // Logic: Do we add a "+" or just the letter?
+            // Check if the current display is a Modifier (e.g., "CTRL")
+            bool isModifierHeld = current.Equals("CTRL") || current.Equals("Shift") ||
+                                  current.Equals("Alt") || current.Equals("❖");
+
+            if (isModifierHeld)
+            {
+                lastfrm.lblKeys.Text += " + " + text;
+            }
+            else
+            {
+                lastfrm.lblKeys.Text += text;
+            }
+
+            PositionAndShow(lastfrm);
+        }
+
+        private void PositionAndShow(frmPopup frm)
+        {
+            if (frm.lblKeys.Text.Trim().Length == 0) return;
+
+            frm.Show();
+            // Recalculate bounds based on new text size
+            frm.Bounds = new Rectangle(
+                Screen.PrimaryScreen.WorkingArea.Left,
+                Screen.PrimaryScreen.Bounds.Height - frm.Height - 100,
+                frm.lblKeys.PreferredWidth, // Use PreferredWidth for auto-sizing
+                frm.lblKeys.PreferredHeight
+            );
+        }
+
+        // Helpers
+        private bool IsModifier(Keys k) =>
+            k == Keys.LControlKey || k == Keys.RControlKey ||
+            k == Keys.LShiftKey || k == Keys.RShiftKey ||
+            k == Keys.LMenu || k == Keys.RMenu ||
+            k == Keys.LWin || k == Keys.RWin;
+
+        private bool IsTerminatingKey(Keys k) =>
+            k == Keys.Enter || k == Keys.Escape || k == Keys.Back;
+
         private void frmMain_Load(object sender, EventArgs e)
         {
             // Hooks only into specified Keys (here "A" and "B").
@@ -248,7 +309,6 @@ namespace KeyStroke
         }
 
 
-        [SupportedOSPlatform("windows")]
         private void loadComponents()
         {
             TableLayoutPanel tlp1 = new TableLayoutPanel() { Dock = DockStyle.Fill };
@@ -257,8 +317,8 @@ namespace KeyStroke
             this.Controls.Add(tlp1);
 
             var rowIndex = -1;
-            var scale = GetMagnificationScale();
-            var rowHeight = 35 * scale;
+            //var scale = GetMagnificationScale();
+            var rowHeight = 30;
 
             rowIndex++;
             tlp1.RowStyles.Add(new RowStyle(SizeType.Absolute, rowHeight));
@@ -272,7 +332,7 @@ namespace KeyStroke
             tlp1.Controls.Add(lbl, 0, rowIndex);
 
             rowIndex++;
-            tlp1.RowStyles.Add(new RowStyle(SizeType.Absolute, rowHeight));
+            tlp1.RowStyles.Add(new RowStyle(SizeType.AutoSize, rowHeight));
             cmbDisplay = new ComboBox()
             {
                 Name = "cmbDisplay",
@@ -339,22 +399,24 @@ namespace KeyStroke
                         chk.Checked = (bool)Properties.Settings.Default[checkboxNames[i]];
                         checkboxValues[checkboxNames[i]] = chk.Checked;
                     }
-                } catch{ }
+                }
+                catch { }
 
                 // Add the checkbox to the form
-                tlp1.Controls.Add(chk,0,rowIndex);
+                tlp1.Controls.Add(chk, 0, rowIndex);
             }
 
             this.Visible = false;
             ni1.Visible = true;
             this.ShowInTaskbar = false;
-            this.Text = $"{Application.ProductName} - {Application.ProductVersion}: Preferences";
+            var version = Assembly.GetEntryAssembly()?.GetName().Version;
+            this.Text = $"{Application.ProductName} - {version}: Preferences";
 
             // Assuming tableLayoutPanel1 is the TableLayoutPanel on your form
             int totalHeight = tlp1.RowStyles.Cast<RowStyle>().Sum(row => (int)row.Height);
 
             // Optionally, add some padding or extra space
-            int padding = this.Height-this.ClientRectangle.Height; // You can adjust this value as needed
+            int padding = this.Height - this.ClientRectangle.Height; // You can adjust this value as needed
             int newFormHeight = totalHeight + padding;
 
             // Set the form's new height
@@ -362,32 +424,67 @@ namespace KeyStroke
 
             tlp1.RowCount = rowIndex + 1;
 
-            if (Screen.AllScreens.Count() > 1)
+            // Clear existing items to prevent duplicates if run multiple times
+            cmbDisplay.Items.Clear();
+
+            Screen[] allScreens = Screen.AllScreens;
+
+            // 1. Populate the ComboBox
+            for (int i = 0; i < allScreens.Length; i++)
             {
-                cmbDisplay.Enabled = true;
-                var index = 0;
-                foreach (var disp in Screen.AllScreens)
+                // Wrap the screen in our helper class
+                var item = new ScreenDisplayItem
                 {
-                    cmbDisplay.Items.Add(disp.DeviceName.Replace(".", "").Replace("\\", "").Replace("/", ""));// + "|" + disp.WorkingArea.Left + "," + disp.WorkingArea.Top + "," + disp.WorkingArea.Width + "," + disp.WorkingArea.Height);
-                    if (index == Properties.Settings.Default.Monitor)
-                    {
-                        screen = disp;
-                    }
-                    index++;
-                }
-                if (cmbDisplay.Items.Count > Properties.Settings.Default.Monitor)
-                    cmbDisplay.SelectedIndex = Properties.Settings.Default.Monitor;
-            }
-            else
-            {
-                cmbDisplay.Enabled = false;
+                    Screen = allScreens[i],
+                    SystemIndex = i
+                };
+                cmbDisplay.Items.Add(item);
             }
 
-            cmbDisplay.SelectedIndexChanged += (sender, e) => { DrawBorderAroundScreen(cmbDisplay.SelectedIndex); };
+            // 2. Handle Selection Logic
+            if (cmbDisplay.Items.Count > 0)
+            {
+                int savedIndex = Properties.Settings.Default.Monitor;
+
+                // Safety check: Does the saved index actually exist? (e.g. user unplugged a monitor)
+                if (savedIndex >= 0 && savedIndex < cmbDisplay.Items.Count)
+                {
+                    cmbDisplay.SelectedIndex = savedIndex;
+                }
+                else
+                {
+                    cmbDisplay.SelectedIndex = 0; // Default to first available
+                }
+            }
+
+            // 3. Toggle Availability
+            // Disable the box if there is only 1 screen, but keep it visible so they see info
+            cmbDisplay.Enabled = (allScreens.Length > 1);
+
+            // 4. Clean Event Handling
+            // Remove first to ensure we don't subscribe twice if this function runs again
+            cmbDisplay.SelectedIndexChanged -= OnScreenSelectionChanged;
+            cmbDisplay.SelectedIndexChanged += OnScreenSelectionChanged;
+
+            // Force the update immediately so the 'screen' variable is set correctly on load
+            OnScreenSelectionChanged(cmbDisplay, EventArgs.Empty);
 
         }
 
-        [SupportedOSPlatform("windows")]
+        private void OnScreenSelectionChanged(object sender, EventArgs e)
+        {
+            if (cmbDisplay.SelectedItem is ScreenDisplayItem selectedItem)
+            {
+                // Update your global variable
+                this.screen = selectedItem.Screen;
+
+                // Visual Feedback: Draw the border so they know which one they picked
+                // We use SystemIndex because your DrawBorder function likely expects the raw index
+                DrawBorderAroundScreen(selectedItem.SystemIndex);
+            }
+        }
+
+        
         // Event handler for CheckBox.CheckedChanged event
         private void CheckBox_CheckedChanged(object sender, EventArgs e)
         {
@@ -470,18 +567,40 @@ namespace KeyStroke
     }
 
     [SupportedOSPlatform("windows")]
+    public class ScreenDisplayItem
+    {
+        public Screen Screen { get; set; }
+        public int SystemIndex { get; set; }
+
+        // This overrides what the ComboBox displays
+        public override string ToString()
+        {
+            string label = $"Display {SystemIndex + 1}";
+
+            if (Screen.Primary)
+                label += " (Main)";
+
+            // Adding resolution helps users identify screens quickly
+            label += $" - {Screen.Bounds.Width}x{Screen.Bounds.Height}";
+
+            return label;
+        }
+    }
+
+
+    [SupportedOSPlatform("windows")]
     public partial class frmPopup : Form
     {
-        double opac = 1;
+        // Use double for calculation, but float is native to Opacity
+        private double opac = 1.0;
         public Label lblKeys = new Label();
-        protected override bool ShowWithoutActivation { get { return true; } }
-        
-        [SupportedOSPlatform("windows")]
+
+        protected override bool ShowWithoutActivation => true;
+
         protected override CreateParams CreateParams
         {
             get
             {
-                //make sure Top Most property on form is set to false otherwise this doesn't work
                 int WS_EX_TOPMOST = 0x00000008;
                 CreateParams cp = base.CreateParams;
                 cp.ExStyle |= WS_EX_TOPMOST;
@@ -489,49 +608,70 @@ namespace KeyStroke
             }
         }
 
-        [SupportedOSPlatform("windows")]
         public frmPopup()
         {
-            FormCollection frms = Application.OpenForms;
-            foreach (Form f in frms)
-            {
-                if (f.GetType() == typeof(frmPopup))
-                {
-                    f.Top = f.Top - f.Height - 5;
-                }
-            }
 
+            // 1. Setup UI
             this.FormBorderStyle = FormBorderStyle.None;
             this.BackColor = Color.Black;
             this.ShowInTaskbar = false;
-            lblKeys.Font = new Font(this.Font.Name,32);
+
+            // Setup Label
+            lblKeys.Font = new Font(this.Font.Name, 32);
             lblKeys.ForeColor = Color.White;
-            lblKeys.AutoSize  = true;
+            lblKeys.AutoSize = true;
+            lblKeys.Location = Point.Empty; // Ensure it starts at 0,0 inside the form
+
+            // --- FIX 1: Prevent Jump ---
+            // Only update the size of the form, preserve the Screen Location
             lblKeys.SizeChanged += (sender, e) =>
             {
-                this.Bounds = lblKeys.Bounds;
+                this.ClientSize = lblKeys.Size;
             };
             this.Controls.Add(lblKeys);
 
-            Timer tmr = new Timer()
+            // 2. Handle Stacking (Move previous toasts up)
+            // usage of ToList() prevents collection modified errors if forms close during loop
+            foreach (Form f in Application.OpenForms.Cast<Form>().ToList())
             {
-                Interval = 100
-            };
-            tmr.Tick += (sender, e) => 
+                // We verify it is a popup AND it is not THIS current new popup
+                if (f.GetType() == typeof(frmPopup) && f != this)
+                {
+                    f.Top -= (this.Height + 5);
+                }
+            }
+
+            // --- FIX 2: Smooth Fading ---
+            // 15ms interval is approx 60 FPS
+            Timer tmrAnimation = new Timer { Interval = 15 };
+
+            tmrAnimation.Tick += (sender, e) =>
             {
-                opac -= 0.1;
+                // Decrease opacity by a smaller amount for smoothness
+                opac -= 0.02;
+                this.Top -= 1; // Slight upward float effect
+
                 if (opac <= 0)
-                    this.Dispose();
-                this.Opacity = opac;
-                this.Top -= 3;
+                {
+                    tmrAnimation.Stop();
+                    this.Close(); // Close is generally safer than Dispose inside a form
+                }
+                else
+                {
+                    this.Opacity = opac;
+                }
             };
 
-            Timer tmr2 = new Timer() { Interval = 3000 };
-            tmr2.Tick += (sender, e) => { tmr.Start(); };
+            // Delay timer to start the animation
+            Timer tmrDelay = new Timer { Interval = 3000 };
+            tmrDelay.Tick += (sender, e) =>
+            {
+                tmrDelay.Stop();
+                tmrAnimation.Start();
+            };
 
-            tmr2.Start();
+            tmrDelay.Start();
         }
-
     }
 
 
