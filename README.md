@@ -55,8 +55,3 @@ Feel free to check the [issues page](https://github.com/drarahimi/KeyStroke/issu
 
 ## 📜 License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-<p align="center">
-  Make by <a href="https://github.com/drarahimi">Dr. Afshin Rahimi</a>
-</p>
