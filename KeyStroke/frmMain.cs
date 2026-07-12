@@ -5,11 +5,9 @@ using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
-using System.Net.Security;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -35,59 +33,7 @@ namespace KeyStroke
 
         private GlobalKeyboardHook _globalKeyboardHook;
 
-        [DllImport("user32.dll")]  public static extern IntPtr GetDC(IntPtr hwnd);
-
-        [DllImport("gdi32.dll")] public static extern int GetDeviceCaps(IntPtr hdc, int nIndex);
-
-        [DllImport("user32.dll", SetLastError = true)] public static extern bool SetProcessDPIAware();
-
-        [DllImport("user32.dll")] public static extern int ReleaseDC(IntPtr hWnd, IntPtr hDC);
-
         [DllImport("user32.dll")]   public static extern short GetAsyncKeyState(Keys vKey);
-
-        public static char ToAscii(Keys key, Keys modifiers)
-        {
-            var outputBuilder = new StringBuilder(2);
-            int result = ToAscii((uint)key, 0, GetKeyState(modifiers),
-                                 outputBuilder, 0);
-            if (result == 1)
-                return outputBuilder[0];
-            else
-                throw new Exception("Invalid key");
-        }
-
-        private const byte HighBit = 0x80;
-        private static byte[] GetKeyState(Keys modifiers)
-        {
-            var keyState = new byte[256];
-            foreach (Keys key in Enum.GetValues(typeof(Keys)))
-            {
-                if ((modifiers & key) == key)
-                {
-                    keyState[(int)key] = HighBit;
-                }
-            }
-            return keyState;
-        }
-
-        [DllImport("user32.dll")] private static extern int ToAscii(uint uVirtKey, uint uScanCode, byte[] lpKeyState, [Out] StringBuilder lpChar, uint uFlags);
-
-
-        //public static float GetMagnificationScale()
-        //    {
-        //        // Set process as DPI-aware
-        //        SetProcessDPIAware();
-
-        //        // Get the screen DPI
-        //        IntPtr hdc = GetDC(IntPtr.Zero);
-        //        int dpi = GetDeviceCaps(hdc, 88); // 88 corresponds to LOGPIXELSX
-        //        ReleaseDC(IntPtr.Zero, hdc);
-
-        //        // Calculate the scale based on the default DPI (96)
-        //        float scale = dpi / 96f;
-
-        //        return scale;
-        //    }
 
         [SupportedOSPlatform("windows")]
         private void OnKeyPressed(object sender, GlobalKeyboardHookEventArgs e)
@@ -164,30 +110,30 @@ namespace KeyStroke
                 {
                     case Keys.LShiftKey:
                     case Keys.RShiftKey:
-                        return checkboxValues["chkShift"] ? "Shift" : "";
+                        return checkboxValues[CheckboxSettings.Shift] ? "Shift" : "";
                     case Keys.LControlKey:
                     case Keys.RControlKey:
-                        return checkboxValues["chkCTRL"] ? "CTRL" : "";
+                        return checkboxValues[CheckboxSettings.Ctrl] ? "CTRL" : "";
                     case Keys.LMenu:
                     case Keys.RMenu:
-                        return checkboxValues["chkAlt"] ? "Alt" : "";
+                        return checkboxValues[CheckboxSettings.Alt] ? "Alt" : "";
                     case Keys.LWin:
                     case Keys.RWin:
-                        return checkboxValues["chkWin"] ? "❖" : "";
+                        return checkboxValues[CheckboxSettings.Win] ? "❖" : "";
                 }
             }
 
             // B. Check Special Keys (These usually show up regardless of modifiers, e.g. Enter)
             switch (key)
             {
-                case Keys.Return: return checkboxValues["chkReturn"] ? "Enter" : "";
+                case Keys.Return: return checkboxValues[CheckboxSettings.Return] ? "Enter" : "";
                 case Keys.Escape: return "Esc";
-                case Keys.Back: return checkboxValues["chkBack"] ? "Back" : "";
+                case Keys.Back: return checkboxValues[CheckboxSettings.Back] ? "Back" : "";
                 case Keys.Space: return "⎵";
-                case Keys.Left: return checkboxValues["chkArrows"] ? "←" : "";
-                case Keys.Right: return checkboxValues["chkArrows"] ? "→" : "";
-                case Keys.Up: return checkboxValues["chkArrows"] ? "↑" : "";
-                case Keys.Down: return checkboxValues["chkArrows"] ? "↓" : "";
+                case Keys.Left: return checkboxValues[CheckboxSettings.Arrows] ? "←" : "";
+                case Keys.Right: return checkboxValues[CheckboxSettings.Arrows] ? "→" : "";
+                case Keys.Up: return checkboxValues[CheckboxSettings.Arrows] ? "↑" : "";
+                case Keys.Down: return checkboxValues[CheckboxSettings.Arrows] ? "↓" : "";
                 case Keys.Home: return "Home";
                 case Keys.End: return "End";
                 case Keys.Delete: return "Delete";
@@ -197,7 +143,7 @@ namespace KeyStroke
 
             // --- LOGIC FOR "ONLY SHOW COMBINED" ---
             // If the checkbox is checked, we verify if a modifier is held down.
-            bool hideUnlessModified = checkboxValues.ContainsKey("chkCombined") && checkboxValues["chkCombined"];
+            bool hideUnlessModified = checkboxValues.ContainsKey(CheckboxSettings.Combined) && checkboxValues[CheckboxSettings.Combined];
 
             if (hideUnlessModified)
             {
@@ -227,17 +173,38 @@ namespace KeyStroke
             // D. Check Numbers/OEM
             string name = key.ToString();
             if (name.StartsWith("D") && name.Length == 2 && char.IsDigit(name[1]))
-                return checkboxValues["chkNum"] ? name.Substring(1) : "";
+                return checkboxValues[CheckboxSettings.Num] ? name.Substring(1) : "";
 
             if (name.StartsWith("NumPad"))
                 return name.Replace("NumPad", "");
 
             if (name.StartsWith("Oem"))
             {
-                return checkboxValues["chkOEM"] ? "?" : "";
+                return checkboxValues[CheckboxSettings.Oem] ? GetOemGlyph(key) : "";
             }
 
             return "";
+        }
+
+        // Maps OEM virtual keys to their unshifted US-layout glyph.
+        private static string GetOemGlyph(Keys key)
+        {
+            switch (key)
+            {
+                case Keys.OemSemicolon: return ";";
+                case Keys.Oemplus: return "=";
+                case Keys.Oemcomma: return ",";
+                case Keys.OemMinus: return "-";
+                case Keys.OemPeriod: return ".";
+                case Keys.OemQuestion: return "/";
+                case Keys.Oemtilde: return "`";
+                case Keys.OemOpenBrackets: return "[";
+                case Keys.OemPipe: return "\\";
+                case Keys.OemCloseBrackets: return "]";
+                case Keys.OemQuotes: return "'";
+                case Keys.OemBackslash: return "\\";
+                default: return "?";
+            }
         }
 
         private void CreateNewPopup(string text)
@@ -251,9 +218,6 @@ namespace KeyStroke
 
         private void AppendToPopup(string text)
         {
-            // Safety check
-            if (lastfrm.lblKeys == null) return;
-
             string current = lastfrm.lblKeys.Text;
 
             // Logic: Do we add a "+" or just the letter?
@@ -279,9 +243,10 @@ namespace KeyStroke
 
             frm.Show();
             // Recalculate bounds based on new text size
+            Screen targetScreen = screen ?? Screen.PrimaryScreen;
             frm.Bounds = new Rectangle(
-                Screen.PrimaryScreen.WorkingArea.Left,
-                Screen.PrimaryScreen.Bounds.Height - frm.Height - 100,
+                targetScreen.WorkingArea.Left,
+                targetScreen.WorkingArea.Top + targetScreen.WorkingArea.Height - frm.Height - 100,
                 frm.lblKeys.PreferredWidth, // Use PreferredWidth for auto-sizing
                 frm.lblKeys.PreferredHeight
             );
@@ -299,9 +264,6 @@ namespace KeyStroke
 
         private void frmMain_Load(object sender, EventArgs e)
         {
-            // Hooks only into specified Keys (here "A" and "B").
-            //_globalKeyboardHook = new GlobalKeyboardHook(new Keys[] { Keys.A, Keys.B });
-
             // Hooks into all keys.
             _globalKeyboardHook = new GlobalKeyboardHook();
             _globalKeyboardHook.KeyboardPressed += OnKeyPressed;
@@ -317,7 +279,6 @@ namespace KeyStroke
             this.Controls.Add(tlp1);
 
             var rowIndex = -1;
-            //var scale = GetMagnificationScale();
             var rowHeight = 30;
 
             rowIndex++;
@@ -348,45 +309,14 @@ namespace KeyStroke
             tlp1.Controls.Add(cmbDisplay, 0, rowIndex);
 
 
-            List<string> checkboxNames = new List<string>
-            {
-                "chkCombined",
-                "chkBack",
-                "chkReturn",
-                "chkArrows",
-                "chkShift",
-                "chkCTRL",
-                "chkAlt",
-                "chkWin",
-                "chkOEM",
-                "chkNum"
-            };
-            List<string> checkboxTexts = new List<string>
-            {   "Only show alphabet combined with special keys",
-                "Back",
-                "Return/Enter",
-                "Arrows",
-                "Shift",
-                "CTRL",
-                "Alt",
-                "Windows Key",
-                "OEM ({ } \\ ; ' ...)",
-                "Numbers (1, 2, 3, ...)"
-            };
-
-            if (checkboxNames.Count != checkboxTexts.Count)
-            {
-                throw new ArgumentException("The number of checkbox names and texts should be the same.");
-            }
-
-            for (int i = 0; i < checkboxNames.Count; i++)
+            foreach (var (key, label) in CheckboxSettings.All)
             {
                 rowIndex++;
                 tlp1.RowStyles.Add(new RowStyle(SizeType.Absolute, rowHeight));
                 CheckBox chk = new CheckBox()
                 {
-                    Name = checkboxNames[i],
-                    Text = checkboxTexts[i],
+                    Name = key,
+                    Text = label,
                     Dock = DockStyle.Fill
                 };
                 chk.CheckedChanged += CheckBox_CheckedChanged;
@@ -394,10 +324,10 @@ namespace KeyStroke
                 // Load the saved value from Properties.Settings
                 try
                 {
-                    if (Properties.Settings.Default[checkboxNames[i]] != null)
+                    if (Properties.Settings.Default[key] != null)
                     {
-                        chk.Checked = (bool)Properties.Settings.Default[checkboxNames[i]];
-                        checkboxValues[checkboxNames[i]] = chk.Checked;
+                        chk.Checked = (bool)Properties.Settings.Default[key];
+                        checkboxValues[key] = chk.Checked;
                     }
                 }
                 catch { }
